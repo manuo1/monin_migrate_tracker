@@ -1,0 +1,42 @@
+# Secrets and local config
+.env
+.env.*
+!.env.example
+
+# Local-only notes (may contain private details, never published)
+docs/HANDOFF.md
+HANDOFF.local.md
+
+# Data that must never be public (real tickets, screenshots, dumps)
+*.sqlite3
+*.sqlite3-journal
+media/
+dumps/
+*.dump
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+
+# Tooling caches
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Django
+staticfiles/
+logs/
+*.log
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
