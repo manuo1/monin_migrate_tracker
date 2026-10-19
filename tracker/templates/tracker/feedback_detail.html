@@ -4,6 +4,7 @@
 {% block content %}
 <a href="{{ back_url }}" class="btn btn-sm btn-outline-secondary mb-3">← Retour à la liste</a>
 <a href="{% url 'feedback_create' %}?copy={{ feedback.pk }}" class="btn btn-sm btn-outline-secondary mb-3 ms-2">Copier ce ticket</a>
+{% if user.is_staff %}<a href="{% url 'feedback_edit' feedback.pk %}" class="btn btn-sm btn-outline-primary mb-3 ms-2">Modifier</a>{% endif %}
 
 <div class="d-flex align-items-center gap-3 mb-3">
   <h1 class="h3 m-0">Ticket #{{ feedback.pk }}</h1>

@@ -8,11 +8,11 @@ from django.views.decorators.http import require_POST
 
 from .. import rules, services
 from ..choices import FeedbackType
-from ..forms import CommentForm, FeedbackForm
+from ..forms import CommentForm, FeedbackForm, FeedbackStaffForm
 from ..models import Feedback
 from ..statuses import FEEDBACK_STATUS_BY_CODE, FEEDBACK_STATUSES
 from ..timeline import build_timeline
-from .common import can_add_attachments, distinct_page_and_tab_values
+from .common import can_add_attachments, distinct_page_and_tab_values, staff_required
 
 # Sortable list columns: URL key -> ORM field.
 SORT_FIELDS = {
@@ -161,6 +161,25 @@ def feedback_create(request):
             "my_feedbacks": Feedback.objects.filter(author=request.user),
         },
     )
+
+
+@staff_required
+def feedback_edit(request, pk):
+    """Staff edits type, page, tab and article of a feedback; each changed field is traced. Description is read-only."""
+    feedback = get_object_or_404(Feedback, pk=pk)
+    if request.method == "POST":
+        before = Feedback.objects.get(pk=pk)  # the form mutates `feedback`: keep an untouched copy to diff against
+        form = FeedbackStaffForm(request.POST, instance=feedback)
+        if form.is_valid():
+            changes = services.save_changes(before, form.instance, request.user)
+            if changes:
+                messages.success(request, f"Ticket #{pk} modifié ({changes} changement(s)).")
+            else:
+                messages.info(request, "Aucune modification.")
+            return redirect("feedback_detail", pk=pk)
+    else:
+        form = FeedbackStaffForm(instance=feedback)
+    return render(request, "tracker/feedback_edit.html", {"form": form, "feedback": feedback})
 
 
 @login_required

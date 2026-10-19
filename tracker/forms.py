@@ -5,6 +5,7 @@ from .models import Comment, Feedback
 
 # Enables the browser spell checker (French) on free-text fields.
 SPELLCHECK = {"spellcheck": "true", "lang": "fr"}
+SMALL = "form-control form-control-sm"
 
 
 class CommentForm(forms.ModelForm):
@@ -78,3 +79,22 @@ class FeedbackForm(forms.ModelForm):
                         "Modifiez l'un de ces trois champs pour créer un nouveau ticket."
                     )
         return cleaned
+
+
+class FeedbackStaffForm(forms.ModelForm):
+    """Manual edit of a feedback by staff (each change is traced). The description is the user's: read-only."""
+
+    class Meta:
+        model = Feedback
+        fields = ["type", "page", "tab", "article_id"]
+        labels = {"type": "Type", "page": "Page", "tab": "Onglet", "article_id": "Article testé"}
+        widgets = {
+            "type": forms.Select(attrs={"class": "form-select form-select-sm"}),
+            "page": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", **SPELLCHECK}),
+            "tab": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", **SPELLCHECK}),
+            "article_id": forms.TextInput(attrs={"class": SMALL}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["type"].choices = FeedbackType.choices
