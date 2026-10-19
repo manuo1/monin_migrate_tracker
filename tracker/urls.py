@@ -8,4 +8,10 @@ urlpatterns = [
     path("feedbacks/<int:pk>/comment/", feedbacks.add_comment, name="add_comment"),
     path("feedbacks/<int:pk>/retest/", feedbacks.retest, name="retest"),
     path("attachments/<int:pk>/", attachments.attachment_file, name="attachment_file"),
+    path("feedbacks/<int:pk>/attachments/", attachments.add_attachments, name="add_attachments"),
+    path(
+        "feedbacks/<int:pk>/attachments/<int:attachment_id>/remove/",
+        attachments.remove_attachment,
+        name="remove_attachment",
+    ),
 ]

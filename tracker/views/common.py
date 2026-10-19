@@ -17,6 +17,11 @@ def staff_required(view):
     return wrapper
 
 
+def can_add_attachments(user, feedback):
+    """The feedback's author and staff can add files; removing is staff only."""
+    return user.is_staff or feedback.author_id == user.id
+
+
 def distinct_page_and_tab_values(model, page=""):
     """Distinct page and tab values of `model` for list filters; tabs are limited to the selected page."""
     pages = model.objects.exclude(page="").values_list("page", flat=True)

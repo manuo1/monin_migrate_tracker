@@ -12,7 +12,7 @@ from ..forms import CommentForm
 from ..models import Feedback
 from ..statuses import FEEDBACK_STATUS_BY_CODE, FEEDBACK_STATUSES
 from ..timeline import build_timeline
-from .common import distinct_page_and_tab_values
+from .common import can_add_attachments, distinct_page_and_tab_values
 
 # Sortable list columns: URL key -> ORM field.
 SORT_FIELDS = {
@@ -121,6 +121,7 @@ def _render_detail(request, feedback, retest_comment=""):
             "comment_form": CommentForm(),
             "retest_open": rules.retest_is_open(feedback, request.user),
             "retest_comment": retest_comment,
+            "can_add_attachments": can_add_attachments(request.user, feedback),
             "back_url": request.session.get("feedback_list_url") or reverse("feedback_list"),
         },
     )
