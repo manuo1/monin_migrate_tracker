@@ -4,6 +4,7 @@ from .views import attachments, feedbacks
 
 urlpatterns = [
     path("", feedbacks.feedback_list, name="feedback_list"),
+    path("feedbacks/new/", feedbacks.feedback_create, name="feedback_create"),
     path("feedbacks/<int:pk>/", feedbacks.feedback_detail, name="feedback_detail"),
     path("feedbacks/<int:pk>/comment/", feedbacks.add_comment, name="add_comment"),
     path("feedbacks/<int:pk>/retest/", feedbacks.retest, name="retest"),

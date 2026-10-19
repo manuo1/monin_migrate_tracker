@@ -1,4 +1,5 @@
 import pytest
+from django.contrib.staticfiles import finders
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
@@ -123,3 +124,34 @@ def test_detail_shows_only_the_attachment_actions_the_user_may_use(client, role,
 
     assert (reverse("add_attachments", args=[feedback.pk]) in content) is can_add
     assert (reverse("remove_attachment", args=[feedback.pk, attachment.pk]) in content) is can_remove
+
+
+def test_detail_exposes_attachments_to_the_viewer_through_the_authenticated_url(client):
+    feedback = FeedbackFactory()
+    attachment = feedback.attachments.create(file=upload("shot.png"))
+    client.force_login(StaffFactory())
+
+    content = client.get(reverse("feedback_detail", args=[feedback.pk])).content.decode()
+
+    assert 'data-kind="image"' in content
+    assert f'data-url="{reverse("attachment_file", args=[attachment.pk])}"' in content
+    assert 'id="viewer-delete-form"' in content
+    assert "/media/" not in content
+
+
+def test_viewer_delete_button_is_for_staff_only(client):
+    feedback = FeedbackFactory()
+    feedback.attachments.create(file=upload())
+    client.force_login(feedback.author)
+    content = client.get(reverse("feedback_detail", args=[feedback.pk])).content.decode()
+    assert 'id="attachment-viewer"' in content
+    assert 'id="viewer-delete-form"' not in content
+
+
+@pytest.mark.parametrize("script", ["tracker/dropzone.js", "tracker/attachment_viewer.js"])
+def test_attachment_scripts_are_served_as_static_files(client, script):
+    assert finders.find(script)
+    feedback = FeedbackFactory()
+    client.force_login(feedback.author)
+    content = client.get(reverse("feedback_detail", args=[feedback.pk])).content.decode()
+    assert f"/static/{script}" in content

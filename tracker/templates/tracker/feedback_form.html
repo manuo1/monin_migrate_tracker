@@ -1,0 +1,93 @@
+{% extends "tracker/base.html" %}
+{% load static %}
+{% block title %}Nouveau ticket{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3">Nouveau ticket</h1>
+<div class="row g-4">
+  <div class="col-lg-8">
+    <form method="post" enctype="multipart/form-data" class="card card-body" id="attachment-zone">
+      {% csrf_token %}
+      {% if source %}<input type="hidden" name="copy" value="{{ source.pk }}">{% endif %}
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+        {% if form.duplicate %}<a href="{% url 'feedback_detail' form.duplicate.pk %}">Voir le ticket #{{ form.duplicate.pk }}</a>{% endif %}
+      </div>
+      {% endif %}
+
+      {% for field in form.visible_fields %}
+        {% if field.name == "files" %}
+        <div class="mb-3">
+          {% if copied_attachments %}
+          <label class="form-label">Pièces jointes reprises du ticket #{{ source.pk }}</label>
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            {% for c in copied_attachments %}{% if c.checked %}
+            <div class="position-relative border rounded p-1 bg-white text-center" style="width: 110px">
+              <input type="hidden" name="copy_attachment" value="{{ c.attachment.pk }}">
+              <a href="{% url 'attachment_file' c.attachment.pk %}" target="_blank" rel="noopener" class="text-decoration-none text-body" title="Ouvrir">
+                {% if c.attachment.kind == 'image' %}
+                  <img src="{% url 'attachment_file' c.attachment.pk %}" alt="{{ c.attachment.name }}" style="height: 70px; max-width: 100%; object-fit: cover">
+                {% elif c.attachment.kind == 'video' %}
+                  <video src="{% url 'attachment_file' c.attachment.pk %}#t=0.1" preload="metadata" muted style="height: 70px; max-width: 100%; pointer-events: none"></video>
+                {% elif c.attachment.kind == 'pdf' %}
+                  <div class="bg-light d-flex align-items-center justify-content-center fw-bold text-danger" style="height: 70px">PDF</div>
+                {% else %}
+                  <div class="bg-light d-flex align-items-center justify-content-center fw-bold text-secondary" style="height: 70px">FICHIER</div>
+                {% endif %}
+                <div class="small text-truncate" title="{{ c.attachment.name }}">{{ c.attachment.name }}</div>
+              </a>
+              <button type="button" data-remove-parent class="btn btn-sm btn-danger position-absolute top-0 end-0 py-0 px-1" title="Retirer de la copie">✕</button>
+            </div>
+            {% endif %}{% endfor %}
+          </div>
+          {% endif %}
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          <div class="small text-muted mt-1">Glissez des fichiers sur le formulaire ou collez une capture avec Ctrl+V.</div>
+          <div id="attachment-staged" class="small mt-1"></div>
+          {% for e in field.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+        {% else %}
+        <div class="mb-3">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for e in field.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+        {% endif %}
+      {% endfor %}
+
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary">Enregistrer</button>
+        <a class="btn btn-outline-secondary" href="{% url 'feedback_list' %}">Annuler</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card"><div class="card-body small">
+      <strong>Mes tickets</strong>
+      {% if not my_feedbacks %}<div class="text-muted mt-1">Aucun ticket pour l'instant.</div>{% endif %}
+      <ul class="list-unstyled mb-0 mt-2">
+        {% for f in my_feedbacks %}
+        <li class="mb-2 pb-2 border-bottom">
+          <div class="d-flex justify-content-between align-items-start gap-2">
+            <div>
+              <a href="{% url 'feedback_detail' f.pk %}">#{{ f.pk }}</a>
+              <span class="badge text-bg-{{ f.status_info.color }}">{{ f.status_info.label }}</span>
+              <div class="text-muted">{{ f.get_type_display }} · {{ f.page }}{% if f.tab %} &rsaquo; {{ f.tab }}{% endif %}</div>
+              <div class="text-muted">{{ f.description|truncatechars:60 }}</div>
+            </div>
+            <a class="btn btn-sm btn-outline-secondary text-nowrap" href="{% url 'feedback_create' %}?copy={{ f.pk }}">Copier</a>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'tracker/dropzone.js' %}"></script>
+<script src="{% static 'tracker/feedback_form.js' %}"></script>
+{% endblock %}

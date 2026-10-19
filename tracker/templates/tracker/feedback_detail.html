@@ -1,7 +1,9 @@
 {% extends "tracker/base.html" %}
+{% load static %}
 {% block title %}Ticket #{{ feedback.pk }}{% endblock %}
 {% block content %}
 <a href="{{ back_url }}" class="btn btn-sm btn-outline-secondary mb-3">← Retour à la liste</a>
+<a href="{% url 'feedback_create' %}?copy={{ feedback.pk }}" class="btn btn-sm btn-outline-secondary mb-3 ms-2">Copier ce ticket</a>
 
 <div class="d-flex align-items-center gap-3 mb-3">
   <h1 class="h3 m-0">Ticket #{{ feedback.pk }}</h1>
@@ -46,28 +48,39 @@
 </div>
 
 {% if attachments or can_add_attachments %}
-<div class="card mb-3">
+<div class="card mb-3" id="attachment-zone" data-auto="1">
   <div class="card-header">Pièces jointes</div>
-  <ul class="list-group list-group-flush">
-    {% for a in attachments %}
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-      <a href="{% url 'attachment_file' a.pk %}" target="_blank" rel="noopener">{{ a.name }}</a>
-      {% if user.is_staff %}
-      <form method="post" action="{% url 'remove_attachment' feedback.pk a.pk %}">
-        {% csrf_token %}
-        <button class="btn btn-sm btn-outline-danger">Supprimer</button>
-      </form>
-      {% endif %}
-    </li>
-    {% empty %}
-    <li class="list-group-item text-muted">Aucune pièce jointe.</li>
-    {% endfor %}
-  </ul>
+  <div class="card-body">
+    <div class="d-flex flex-wrap gap-3">
+      {% for a in attachments %}
+      <a href="{% url 'attachment_file' a.pk %}" target="_blank" rel="noopener" class="attachment-item text-decoration-none text-body" style="max-width: 200px"
+         data-kind="{{ a.kind }}" data-url="{% url 'attachment_file' a.pk %}" data-name="{{ a.name }}" data-date="{{ a.created_at|date:'d/m/Y H:i' }}"{% if user.is_staff %} data-remove-url="{% url 'remove_attachment' feedback.pk a.pk %}"{% endif %}>
+        {% if a.kind == 'image' %}
+          <img src="{% url 'attachment_file' a.pk %}" alt="{{ a.name }}" class="border rounded" style="height: 110px; max-width: 200px; object-fit: cover">
+        {% elif a.kind == 'video' %}
+          <video src="{% url 'attachment_file' a.pk %}#t=0.1" preload="metadata" muted class="border rounded" style="height: 110px; max-width: 200px; pointer-events: none"></video>
+        {% elif a.kind == 'pdf' %}
+          <div class="border rounded bg-light d-flex align-items-center justify-content-center fw-bold text-danger" style="height: 110px; width: 90px">PDF</div>
+        {% else %}
+          <div class="border rounded bg-light d-flex align-items-center justify-content-center fw-bold text-secondary" style="height: 110px; width: 90px">FICHIER</div>
+        {% endif %}
+        <div class="small text-truncate">{{ a.name }}</div>
+        <div class="small text-muted">{{ a.created_at|date:"d/m/Y H:i" }}</div>
+      </a>
+      {% empty %}
+      <p class="text-muted m-0">Aucune pièce jointe.</p>
+      {% endfor %}
+    </div>
+  </div>
   {% if can_add_attachments %}
-  <form method="post" action="{% url 'add_attachments' feedback.pk %}" enctype="multipart/form-data" class="card-body border-top d-flex gap-2">
+  <form method="post" action="{% url 'add_attachments' feedback.pk %}" enctype="multipart/form-data" class="card-body border-top">
     {% csrf_token %}
-    <input type="file" name="files" multiple class="form-control form-control-sm">
-    <button class="btn btn-sm btn-primary">Ajouter</button>
+    <div class="d-flex gap-2">
+      <input type="file" name="files" multiple class="form-control form-control-sm">
+      <button class="btn btn-sm btn-primary">Ajouter</button>
+    </div>
+    <div class="small text-muted mt-2">Choisissez, glissez des fichiers sur ce cadre ou collez une capture avec Ctrl+V : l'ajout est immédiat.</div>
+    <div id="attachment-staged" class="small mt-1"></div>
   </form>
   {% endif %}
 </div>
@@ -93,4 +106,25 @@
   {{ comment_form.text }}
   <button class="btn btn-primary mt-2 align-self-start">Commenter</button>
 </form>
+
+{% if attachments %}
+<div id="attachment-viewer" style="display:none; position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,.88)">
+  <button type="button" id="viewer-close" class="btn btn-light position-absolute top-0 end-0 m-3" title="Fermer (Échap)">✕</button>
+  {% if user.is_staff %}
+  <form id="viewer-delete-form" method="post" class="position-absolute top-0 start-0 m-3">
+    {% csrf_token %}
+    <button class="btn btn-danger">Supprimer</button>
+  </form>
+  {% endif %}
+  <button type="button" id="viewer-prev" class="btn btn-light position-absolute top-50 start-0 ms-3 translate-middle-y" title="Précédent (←)">‹</button>
+  <button type="button" id="viewer-next" class="btn btn-light position-absolute top-50 end-0 me-3 translate-middle-y" title="Suivant (→)">›</button>
+  <div id="viewer-content" class="position-absolute d-flex align-items-center justify-content-center" style="inset: 56px 80px 56px 80px"></div>
+  <div id="viewer-caption" class="position-absolute bottom-0 start-0 w-100 text-center text-white small pb-3"></div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'tracker/dropzone.js' %}"></script>
+<script src="{% static 'tracker/attachment_viewer.js' %}"></script>
 {% endblock %}

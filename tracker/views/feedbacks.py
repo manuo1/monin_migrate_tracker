@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 
 from .. import rules, services
 from ..choices import FeedbackType
-from ..forms import CommentForm
+from ..forms import CommentForm, FeedbackForm
 from ..models import Feedback
 from ..statuses import FEEDBACK_STATUS_BY_CODE, FEEDBACK_STATUSES
 from ..timeline import build_timeline
@@ -99,6 +99,66 @@ def feedback_list(request):
             "sort": sort,
             "order": order,
             "base_query": base_query.urlencode(),
+        },
+    )
+
+
+def _copy_source(request):
+    """Feedback to copy (`copy` parameter): any logged-in user can copy any feedback."""
+    pk = request.GET.get("copy") or request.POST.get("copy") or ""
+    return Feedback.objects.filter(pk=pk).first() if pk.isdigit() else None
+
+
+@login_required
+def feedback_create(request):
+    """New feedback, optionally prefilled from `?copy=<id>` (fields and attachments by reference, no comments)."""
+    source = _copy_source(request)
+    kept_ids = set(request.POST.getlist("copy_attachment")) if request.method == "POST" else None
+
+    if request.method == "POST":
+        form = FeedbackForm(request.POST, request.FILES)
+        if form.is_valid():
+            data = form.cleaned_data
+            files = data.pop("files")
+            feedback = services.create_feedback(
+                author=request.user,
+                files=files,
+                source=source,
+                copied_attachment_ids=kept_ids if source else (),
+                **data,
+            )
+            messages.success(request, f"Ticket #{feedback.pk} créé.")
+            return redirect("feedback_detail", pk=feedback.pk)
+    else:
+        feedback_type = request.GET.get("type", "")
+        initial = {"type": feedback_type if feedback_type in FeedbackType.values else FeedbackType.BUG}
+        if source:
+            initial.update(
+                type=source.type,
+                page=source.page,
+                tab=source.tab,
+                article_id=source.article_id,
+                description=source.description,
+            )
+            messages.info(
+                request,
+                f"Copie du ticket #{source.pk} : champs, description et pièces jointes repris "
+                "(commentaires et historique non copiés).",
+            )
+        form = FeedbackForm(initial=initial)
+
+    copied_attachments = [
+        {"attachment": a, "checked": kept_ids is None or str(a.pk) in kept_ids}
+        for a in (source.attachments.all() if source else [])
+    ]
+    return render(
+        request,
+        "tracker/feedback_form.html",
+        {
+            "form": form,
+            "source": source,
+            "copied_attachments": copied_attachments,
+            "my_feedbacks": Feedback.objects.filter(author=request.user),
         },
     )
 
