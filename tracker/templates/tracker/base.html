@@ -14,6 +14,7 @@
     {% if user.is_authenticated %}
     <div class="navbar-nav me-auto">
       <a class="nav-link" href="{% url 'feedback_list' %}">Tickets Monin</a>
+      <a class="nav-link" href="{% url 'vendor_ticket_list' %}">Tickets Aptean</a>
     </div>
     <form method="post" action="{% url 'logout' %}" class="d-flex align-items-center gap-2">
       {% csrf_token %}

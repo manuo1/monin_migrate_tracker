@@ -1,0 +1,72 @@
+{% extends "tracker/base.html" %}
+{% load static %}
+{% block title %}Tickets Aptean{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="display-6 fw-bold m-0">Tickets Aptean</h1>
+</div>
+
+<form method="get" data-list-filters class="row g-2 mb-3">
+  <input type="hidden" name="sort" value="{{ sort }}">
+  <input type="hidden" name="order" value="{{ order }}">
+  <div class="col-auto">
+    <select name="status" data-autosubmit class="form-select">
+      <option value="">Tous statuts Aptean</option>
+      {% for s in statuses %}<option value="{{ s.code }}" {% if filters.status == s.code %}selected{% endif %}>{{ s.label }}</option>{% endfor %}
+      <option value="none" {% if filters.status == 'none' %}selected{% endif %}>Sans statut</option>
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="linked" data-autosubmit class="form-select">
+      <option value="">Liés ou non à un ticket Monin</option>
+      <option value="no" {% if filters.linked == 'no' %}selected{% endif %}>Sans ticket Monin lié</option>
+      <option value="yes" {% if filters.linked == 'yes' %}selected{% endif %}>Avec ticket Monin lié</option>
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="page" data-autosubmit data-reset-field="tab" class="form-select">
+      <option value="">Toutes pages</option>
+      {% for p in pages %}<option value="{{ p }}" {% if filters.page == p %}selected{% endif %}>{{ p }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="tab" data-autosubmit class="form-select">
+      <option value="">Tous onglets</option>
+      {% for t in tabs %}<option value="{{ t }}" {% if filters.tab == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-auto"><input name="q" value="{{ filters.q }}" class="form-control" placeholder="Référence, page, texte... (3 car. min.)" autocomplete="off"></div>
+</form>
+
+<table class="table table-sm table-hover bg-white align-middle">
+  <thead><tr>
+    {% include "tracker/_sortable_th.html" with key="ref" title="Référence" %}
+    {% include "tracker/_sortable_th.html" with key="title" title="Titre" %}
+    {% include "tracker/_sortable_th.html" with key="description" title="Description" %}
+    {% include "tracker/_sortable_th.html" with key="page" title="Page" %}
+    {% include "tracker/_sortable_th.html" with key="tab" title="Onglet" %}
+    {% include "tracker/_sortable_th.html" with key="status" title="Statut chez Aptean" %}
+    {% include "tracker/_sortable_th.html" with key="date" title="Créé le" %}
+    {% include "tracker/_sortable_th.html" with key="feedbacks" title="Tickets Monin liés" %}
+    {% if user.is_staff %}<th></th>{% endif %}
+  </tr></thead>
+  <tbody>
+  {% for t in tickets %}
+    <tr>
+      <td>{{ t.label }}</td>
+      <td style="min-width: 180px">{{ t.title }}</td>
+      <td style="min-width: 260px">{{ t.description|truncatechars:120 }}</td>
+      <td>{{ t.page }}</td>
+      <td>{{ t.tab }}</td>
+      <td>{% if t.status_info %}<span class="badge text-bg-{{ t.status_info.color }}">{{ t.status_info.label }}</span>{% endif %}</td>
+      <td>{% if t.created_on %}{{ t.created_on|date:"d/m/Y" }}{% endif %}</td>
+      <td>{% for f in t.feedbacks.all %}<a href="{% url 'feedback_detail' f.pk %}" class="badge text-bg-{{ f.status_info.color }} text-decoration-none me-1" title="{{ f.status_info.label }}">#{{ f.pk }}</a>{% endfor %}</td>
+      {% if user.is_staff %}<td>{% if t.link %}<a href="{{ t.link }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary">Jira ↗</a>{% endif %}</td>{% endif %}
+    </tr>
+  {% empty %}
+    <tr><td colspan="{% if user.is_staff %}9{% else %}8{% endif %}" class="text-center text-muted">Aucun ticket Aptean.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+{% block scripts %}<script src="{% static 'tracker/list_filters.js' %}"></script>{% endblock %}

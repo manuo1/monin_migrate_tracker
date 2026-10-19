@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import attachments, feedbacks
+from .views import attachments, feedbacks, vendor_tickets
 
 urlpatterns = [
     path("", feedbacks.feedback_list, name="feedback_list"),
@@ -10,6 +10,7 @@ urlpatterns = [
     path("feedbacks/<int:pk>/triage/", feedbacks.feedback_triage, name="feedback_triage"),
     path("feedbacks/<int:pk>/comment/", feedbacks.add_comment, name="add_comment"),
     path("feedbacks/<int:pk>/retest/", feedbacks.retest, name="retest"),
+    path("vendor-tickets/", vendor_tickets.vendor_ticket_list, name="vendor_ticket_list"),
     path("attachments/<int:pk>/", attachments.attachment_file, name="attachment_file"),
     path("feedbacks/<int:pk>/attachments/", attachments.add_attachments, name="add_attachments"),
     path(
