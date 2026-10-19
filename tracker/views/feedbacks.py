@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
-from .. import services
+from .. import rules, services
 from ..choices import FeedbackType
 from ..forms import CommentForm
 from ..models import Feedback
@@ -106,6 +106,10 @@ def feedback_list(request):
 @login_required
 def feedback_detail(request, pk):
     feedback = get_object_or_404(Feedback.objects.select_related("author"), pk=pk)
+    return _render_detail(request, feedback)
+
+
+def _render_detail(request, feedback, retest_comment=""):
     return render(
         request,
         "tracker/feedback_detail.html",
@@ -115,9 +119,26 @@ def feedback_detail(request, pk):
             "attachments": feedback.attachments.all(),
             "timeline": build_timeline(feedback),
             "comment_form": CommentForm(),
+            "retest_open": rules.retest_is_open(feedback, request.user),
+            "retest_comment": retest_comment,
             "back_url": request.session.get("feedback_list_url") or reverse("feedback_list"),
         },
     )
+
+
+@login_required
+@require_POST
+def retest(request, pk):
+    """Rule T2: the author or staff answers a retest request (403 otherwise)."""
+    feedback = get_object_or_404(Feedback.objects.select_related("author"), pk=pk)
+    comment = request.POST.get("comment", "")
+    try:
+        status = services.answer_retest(feedback, request.user, request.POST.get("answer"), comment)
+    except ValueError as error:
+        messages.error(request, str(error))
+        return _render_detail(request, feedback, retest_comment=comment)
+    messages.success(request, f"Retest enregistré : {FEEDBACK_STATUS_BY_CODE[status].label}.")
+    return redirect("feedback_detail", pk=pk)
 
 
 @login_required

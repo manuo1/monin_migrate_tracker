@@ -9,6 +9,22 @@
   {% if feedback.closure_reason %}<span class="text-muted">{{ feedback.get_closure_reason_display }}</span>{% endif %}
 </div>
 
+{% if retest_open %}
+<div class="card card-body border-success mb-3">
+  <strong>Retest demandé</strong>
+  <div class="small text-muted mb-2">Le correctif est disponible : refaites le test puis indiquez le résultat.</div>
+  <form method="post" action="{% url 'retest' feedback.pk %}">
+    {% csrf_token %}
+    <textarea name="comment" rows="3" class="form-control form-control-sm mb-2" spellcheck="true" lang="fr"
+              placeholder="Commentaire (obligatoire pour un Test KO)">{{ retest_comment }}</textarea>
+    <div class="d-flex gap-2">
+      <button name="answer" value="ok" class="btn btn-sm btn-success">Test OK</button>
+      <button name="answer" value="ko" class="btn btn-sm btn-danger">Test KO</button>
+    </div>
+  </form>
+</div>
+{% endif %}
+
 <div class="card card-body mb-3">
   <dl class="row mb-0">
     <dt class="col-sm-3">Type</dt><dd class="col-sm-9">{{ feedback.get_type_display }}</dd>
