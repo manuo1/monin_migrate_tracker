@@ -1,0 +1,56 @@
+{% extends "tracker/base.html" %}
+{% block title %}Ticket #{{ feedback.pk }}{% endblock %}
+{% block content %}
+<a href="{{ back_url }}" class="btn btn-sm btn-outline-secondary mb-3">← Retour à la liste</a>
+
+<div class="d-flex align-items-center gap-3 mb-3">
+  <h1 class="h3 m-0">Ticket #{{ feedback.pk }}</h1>
+  <span class="badge text-bg-{{ feedback.status_info.color }} fs-6">{{ feedback.status_info.label }}</span>
+  {% if feedback.closure_reason %}<span class="text-muted">{{ feedback.get_closure_reason_display }}</span>{% endif %}
+</div>
+
+<div class="card card-body mb-3">
+  <dl class="row mb-0">
+    <dt class="col-sm-3">Type</dt><dd class="col-sm-9">{{ feedback.get_type_display }}</dd>
+    <dt class="col-sm-3">Page</dt><dd class="col-sm-9">{{ feedback.page }}</dd>
+    <dt class="col-sm-3">Onglet</dt><dd class="col-sm-9">{{ feedback.tab|default:"—" }}</dd>
+    <dt class="col-sm-3">Article testé</dt><dd class="col-sm-9">{{ feedback.article_id|default:"—" }}</dd>
+    <dt class="col-sm-3">Auteur</dt><dd class="col-sm-9">{{ feedback.author.username }}</dd>
+    <dt class="col-sm-3">Soumis le</dt><dd class="col-sm-9">{{ feedback.created_at|date:"d/m/Y H:i" }}</dd>
+    <dt class="col-sm-3">Tickets Aptean</dt>
+    <dd class="col-sm-9">
+      {% for t in vendor_tickets %}<span class="badge text-bg-{% if t.status_info %}{{ t.status_info.color }}{% else %}light border{% endif %} me-1">{{ t.label }}</span>{% empty %}—{% endfor %}
+    </dd>
+  </dl>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">Description</div>
+  <div class="card-body" style="white-space: pre-line">{{ feedback.description }}</div>
+</div>
+
+{% if attachments %}
+<div class="card mb-3">
+  <div class="card-header">Pièces jointes</div>
+  <ul class="list-group list-group-flush">
+    {% for a in attachments %}
+    <li class="list-group-item"><a href="{% url 'attachment_file' a.pk %}" target="_blank" rel="noopener">{{ a.name }}</a></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<div class="card mb-3">
+  <div class="card-header">Historique</div>
+  <ul class="list-group list-group-flush">
+    {% for item in timeline %}
+    <li class="list-group-item{% if item.is_comment %} bg-body-tertiary{% endif %}">
+      <div class="small text-muted">{{ item.date|date:"d/m/Y H:i" }} · {{ item.author.username }}</div>
+      <div style="white-space: pre-line">{{ item.text }}</div>
+    </li>
+    {% empty %}
+    <li class="list-group-item text-muted">Aucun événement.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

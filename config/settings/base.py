@@ -85,6 +85,10 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "feedback_list"
+LOGOUT_REDIRECT_URL = "login"
+
 # Allows PDF previews in an iframe on the same site.
 X_FRAME_OPTIONS = "SAMEORIGIN"
 

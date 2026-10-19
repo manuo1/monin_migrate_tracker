@@ -1,0 +1,1 @@
+<th><a class="text-decoration-none text-body" href="?{{ base_query }}&sort={{ key }}&order={% if sort == key and order == 'asc' %}desc{% else %}asc{% endif %}">{{ title }}{% if sort == key %} {% if order == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>

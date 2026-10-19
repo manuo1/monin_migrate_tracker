@@ -1,0 +1,106 @@
+{% extends "tracker/base.html" %}
+{% block content %}
+<style>
+  .desc-clamp { white-space: pre-line; cursor: pointer; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+  .desc-clamp.open { display: block; }
+</style>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="display-6 fw-bold m-0">Tickets Monin</h1>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+  <input type="hidden" name="sort" value="{{ sort }}">
+  <input type="hidden" name="order" value="{{ order }}">
+  <div class="col-auto">
+    <select name="author" class="form-select" onchange="this.form.submit()">
+      <option value="me" {% if filters.author == 'me' %}selected{% endif %}>Mes tickets</option>
+      <option value="" {% if filters.author == '' %}selected{% endif %}>Tous les auteurs</option>
+      {% for u in authors %}<option value="{{ u.pk }}" {% if filters.author == u.pk|stringformat:'s' %}selected{% endif %}>{{ u.username }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="type" class="form-select" onchange="this.form.submit()">
+      <option value="">Tous types</option>
+      {% for value, label in types %}<option value="{{ value }}" {% if filters.type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="status" class="form-select" onchange="this.form.submit()">
+      <option value="">Tous statuts</option>
+      {% for s in statuses %}<option value="{{ s.code }}" {% if filters.status == s.code %}selected{% endif %}>{{ s.label }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="page" class="form-select" onchange="this.form.elements['tab'].value=''; this.form.submit()">
+      <option value="">Toutes pages</option>
+      {% for p in pages %}<option value="{{ p }}" {% if filters.page == p %}selected{% endif %}>{{ p }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="tab" class="form-select" onchange="this.form.submit()">
+      <option value="">Tous onglets</option>
+      {% for t in tabs %}<option value="{{ t }}" {% if filters.tab == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-auto"><input name="q" value="{{ filters.q }}" class="form-control" placeholder="Page, article, texte... (3 car. min.)" autocomplete="off"></div>
+</form>
+
+<table class="table table-sm table-hover bg-white align-middle">
+  <thead><tr>
+    {% include "tracker/_sortable_th.html" with key="id" title="#" %}
+    {% include "tracker/_sortable_th.html" with key="type" title="Type" %}
+    {% include "tracker/_sortable_th.html" with key="page" title="Page" %}
+    {% include "tracker/_sortable_th.html" with key="tab" title="Onglet" %}
+    {% include "tracker/_sortable_th.html" with key="description" title="Description" %}
+    {% include "tracker/_sortable_th.html" with key="author" title="Auteur" %}
+    {% include "tracker/_sortable_th.html" with key="status" title="Statut" %}
+    {% include "tracker/_sortable_th.html" with key="date" title="Soumis le" %}
+    {% include "tracker/_sortable_th.html" with key="vendor" title="Aptean" %}
+  </tr></thead>
+  <tbody>
+  {% for f in feedbacks %}
+    <tr>
+      <td><a href="{% url 'feedback_detail' f.pk %}">#{{ f.pk }}</a></td>
+      <td>{{ f.get_type_display }}</td>
+      <td style="min-width: 180px">{{ f.page }}</td>
+      <td>{{ f.tab }}</td>
+      <td style="min-width: 200px"><div class="desc-clamp" style="max-width: 320px" title="Cliquer pour déplier / replier">{{ f.description }}</div></td>
+      <td>{{ f.author.username }}</td>
+      <td><span class="badge text-bg-{{ f.status_info.color }}">{{ f.status_info.label }}</span></td>
+      <td>{{ f.created_at|date:"d/m/Y" }}</td>
+      <td>{% for t in f.vendor_tickets.all %}<span class="badge text-bg-{% if t.status_info %}{{ t.status_info.color }}{% else %}light border{% endif %} me-1" title="{{ t.status_info.label|default:'Sans statut' }}">{{ t.label }}</span>{% endfor %}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="9" class="text-center text-muted">Aucun ticket.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<script>
+  document.querySelectorAll(".desc-clamp").forEach(function (el) {
+    el.addEventListener("click", function () {
+      if (window.getSelection().toString()) return;  // do not collapse while selecting text
+      el.classList.toggle("open");
+    });
+  });
+
+  const form = document.querySelector("form[method=get]");
+  const q = form.elements["q"];
+  let timer;
+  q.addEventListener("input", () => {
+    clearTimeout(timer);
+    const n = q.value.trim().length;
+    if (n === 0 || n >= 3) {
+      timer = setTimeout(() => {
+        sessionStorage.setItem("refocusQ", "1");
+        form.submit();
+      }, 350);
+    }
+  });
+  if (sessionStorage.getItem("refocusQ")) {
+    sessionStorage.removeItem("refocusQ");
+    q.focus();
+    q.setSelectionRange(q.value.length, q.value.length);
+  }
+</script>
+{% endblock %}
