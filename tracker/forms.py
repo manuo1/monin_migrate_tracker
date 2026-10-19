@@ -1,7 +1,8 @@
 from django import forms
 
-from .choices import FeedbackType
-from .models import Comment, Feedback
+from .choices import ClosureReason, FeedbackType
+from .models import Comment, Feedback, VendorTicket
+from .statuses import FEEDBACK_STATUS_CHOICES
 
 # Enables the browser spell checker (French) on free-text fields.
 SPELLCHECK = {"spellcheck": "true", "lang": "fr"}
@@ -98,3 +99,30 @@ class FeedbackStaffForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["type"].choices = FeedbackType.choices
+
+
+class TriageForm(forms.Form):
+    """Staff triage: status, closure reason, linked vendor tickets and a public explanation (posted as a comment)."""
+
+    status = forms.ChoiceField(
+        choices=FEEDBACK_STATUS_CHOICES,
+        label="Statut",
+        widget=forms.Select(attrs={"class": "form-select form-select-sm"}),
+    )
+    vendor_tickets = forms.ModelMultipleChoiceField(
+        queryset=VendorTicket.objects.all(),
+        required=False,
+        label="Tickets Aptean",
+        widget=forms.SelectMultiple(attrs={"class": "form-select form-select-sm", "size": 5}),
+    )
+    closure_reason = forms.ChoiceField(
+        choices=[("", "---")] + ClosureReason.choices,
+        required=False,
+        label="Motif de clôture",
+        widget=forms.Select(attrs={"class": "form-select form-select-sm"}),
+    )
+    explanation = forms.CharField(
+        required=False,
+        label="Explication (publiée en commentaire)",
+        widget=forms.Textarea(attrs={"class": SMALL, "rows": 3, **SPELLCHECK}),
+    )

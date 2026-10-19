@@ -43,6 +43,22 @@
   </dl>
 </div>
 
+{% if user.is_staff %}
+<form method="post" action="{% url 'feedback_triage' feedback.pk %}" class="card card-body border-primary mb-3">
+  {% csrf_token %}
+  <strong class="mb-2">Triage</strong>
+  {{ triage_form.non_field_errors }}
+  {% for field in triage_form %}
+  <div class="mb-2">
+    <label class="form-label small mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {{ field }}
+    {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+  </div>
+  {% endfor %}
+  <button class="btn btn-sm btn-primary align-self-start">Enregistrer</button>
+</form>
+{% endif %}
+
 <div class="card mb-3">
   <div class="card-header">Description</div>
   <div class="card-body" style="white-space: pre-line">{{ feedback.description }}</div>

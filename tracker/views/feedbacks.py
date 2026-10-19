@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 
 from .. import rules, services
 from ..choices import FeedbackType
-from ..forms import CommentForm, FeedbackForm, FeedbackStaffForm
+from ..forms import CommentForm, FeedbackForm, FeedbackStaffForm, TriageForm
 from ..models import Feedback
 from ..statuses import FEEDBACK_STATUS_BY_CODE, FEEDBACK_STATUSES
 from ..timeline import build_timeline
@@ -188,12 +188,21 @@ def feedback_detail(request, pk):
     return _render_detail(request, feedback)
 
 
-def _render_detail(request, feedback, retest_comment=""):
+def _render_detail(request, feedback, retest_comment="", triage_form=None):
+    if request.user.is_staff and triage_form is None:
+        triage_form = TriageForm(
+            initial={
+                "status": feedback.status,
+                "closure_reason": feedback.closure_reason,
+                "vendor_tickets": feedback.vendor_tickets.all(),
+            }
+        )
     return render(
         request,
         "tracker/feedback_detail.html",
         {
             "feedback": feedback,
+            "triage_form": triage_form,
             "vendor_tickets": feedback.vendor_tickets.all(),
             "attachments": feedback.attachments.all(),
             "timeline": build_timeline(feedback),
@@ -218,6 +227,31 @@ def retest(request, pk):
         messages.error(request, str(error))
         return _render_detail(request, feedback, retest_comment=comment)
     messages.success(request, f"Retest enregistré : {FEEDBACK_STATUS_BY_CODE[status].label}.")
+    return redirect("feedback_detail", pk=pk)
+
+
+@staff_required
+@require_POST
+def feedback_triage(request, pk):
+    """Staff triage: status, closure reason, vendor ticket links and public explanation, in one traced update."""
+    feedback = get_object_or_404(Feedback.objects.select_related("author"), pk=pk)
+    form = TriageForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Triage invalide : vérifiez les champs.")
+        return _render_detail(request, feedback, triage_form=form)
+    data = form.cleaned_data
+    services.triage(
+        feedback,
+        request.user,
+        status=data["status"],
+        closure_reason=data["closure_reason"],
+        explanation=data["explanation"],
+        vendor_tickets=data["vendor_tickets"],
+    )
+    message = "Ticket mis à jour."
+    if feedback.status != data["status"]:  # rule T1 moved the status after the vendor link was added
+        message += f" Le ticket passe en « {FEEDBACK_STATUS_BY_CODE[feedback.status].label} »."
+    messages.success(request, message)
     return redirect("feedback_detail", pk=pk)
 
 
