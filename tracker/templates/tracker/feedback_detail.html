@@ -53,4 +53,11 @@
     {% endfor %}
   </ul>
 </div>
+
+<form method="post" action="{% url 'add_comment' feedback.pk %}" class="card card-body mb-3">
+  {% csrf_token %}
+  <label for="{{ comment_form.text.id_for_label }}" class="form-label">{{ comment_form.text.label }}</label>
+  {{ comment_form.text }}
+  <button class="btn btn-primary mt-2 align-self-start">Commenter</button>
+</form>
 {% endblock %}

@@ -51,6 +51,11 @@ def remove_attachment(feedback, attachment, author):
         attachment.delete()
 
 
+def add_comment(feedback, author, text):
+    """Add a comment to a feedback (open to every logged-in user). Returns the comment."""
+    return Comment.objects.create(feedback=feedback, author=author, text=text.strip())
+
+
 def change_status(feedback, status, author, closure_reason="", explanation=""):
     """Entry point to change a feedback status: history, closure reason, optional comment. No validation rule."""
     with transaction.atomic():

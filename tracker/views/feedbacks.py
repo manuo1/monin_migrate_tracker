@@ -1,10 +1,14 @@
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models import Case, IntegerField, Min, Q, Value, When
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 
+from .. import services
 from ..choices import FeedbackType
+from ..forms import CommentForm
 from ..models import Feedback
 from ..statuses import FEEDBACK_STATUS_BY_CODE, FEEDBACK_STATUSES
 from ..timeline import build_timeline
@@ -110,6 +114,20 @@ def feedback_detail(request, pk):
             "vendor_tickets": feedback.vendor_tickets.all(),
             "attachments": feedback.attachments.all(),
             "timeline": build_timeline(feedback),
+            "comment_form": CommentForm(),
             "back_url": request.session.get("feedback_list_url") or reverse("feedback_list"),
         },
     )
+
+
+@login_required
+@require_POST
+def add_comment(request, pk):
+    """Any logged-in user can comment on any feedback."""
+    feedback = get_object_or_404(Feedback, pk=pk)
+    form = CommentForm(request.POST)
+    if form.is_valid():
+        services.add_comment(feedback, request.user, form.cleaned_data["text"])
+    else:
+        messages.error(request, "Le commentaire est vide.")
+    return redirect("feedback_detail", pk=pk)
