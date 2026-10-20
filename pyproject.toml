@@ -16,4 +16,5 @@ ignore = ["S101"]  # assert is fine in tests
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings.test"
 python_files = ["test_*.py"]
-addopts = "-ra --strict-markers"
+addopts = "-ra --strict-markers -m 'not e2e'"
+markers = ["e2e: browser journeys (Playwright), run with `pytest -m e2e`"]
