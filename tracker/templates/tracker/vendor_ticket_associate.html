@@ -1,0 +1,33 @@
+{% extends "tracker/base.html" %}
+{% load static %}
+{% block title %}Associer des tickets Aptean au ticket #{{ feedback.pk }}{% endblock %}
+{% block content %}
+<a href="{% url 'feedback_detail' feedback.pk %}" class="btn btn-sm btn-outline-secondary mb-3">← Retour au ticket Monin #{{ feedback.pk }}</a>
+
+<h1 class="display-6 fw-bold mb-3">Associer des tickets Aptean</h1>
+
+<div class="card mb-3"><div class="card-body small">
+  <div>
+    <strong>Ticket Monin <a href="{% url 'feedback_detail' feedback.pk %}">#{{ feedback.pk }}</a></strong>
+    · {{ feedback.get_type_display }} · {{ feedback.page }}{% if feedback.tab %} &rsaquo; {{ feedback.tab }}{% endif %}
+    {% if feedback.article_id %}· {{ feedback.article_id }}{% endif %}
+    <span class="badge text-bg-{{ feedback.status_info.color }}">{{ feedback.status_info.label }}</span>
+  </div>
+  <div class="mt-1" style="white-space: pre-wrap; max-height: 8em; overflow: auto">{{ feedback.description }}</div>
+</div></div>
+
+{% include "tracker/_vendor_ticket_filters.html" %}
+
+<form method="post" id="assoc-form" data-storage-key="assoc_{{ feedback.pk }}">
+  {% csrf_token %}
+  <div class="d-flex align-items-center gap-3 mb-2">
+    <button class="btn btn-primary">Associer les tickets cochés</button>
+    <span class="text-muted"><span id="assoc-counter">0</span> ticket(s) coché(s) — la sélection est conservée quand vous filtrez ou recherchez</span>
+  </div>
+  {% include "tracker/_vendor_ticket_table.html" with selection=True %}
+</form>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'tracker/list_filters.js' %}"></script>
+<script src="{% static 'tracker/associate_selection.js' %}"></script>
+{% endblock %}

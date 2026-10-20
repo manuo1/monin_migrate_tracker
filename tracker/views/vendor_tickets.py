@@ -114,6 +114,31 @@ def vendor_ticket_detail(request, pk):
 
 
 @staff_required
+def vendor_ticket_associate(request, pk):
+    """Staff searches vendor tickets (same filters as the list) and links the checked ones to a feedback."""
+    feedback = get_object_or_404(Feedback, pk=pk)
+    already = set(feedback.vendor_tickets.values_list("pk", flat=True))
+    if request.method == "POST":
+        ids = [i for i in request.POST.getlist("tickets") if i.isdigit()]
+        tickets = list(VendorTicket.objects.filter(pk__in=ids).exclude(pk__in=already))
+        if not tickets:
+            messages.error(request, "Aucun ticket Aptean coché.")
+            return redirect(request.get_full_path())
+        status_before = feedback.status
+        services.associate_vendor_tickets(feedback, tickets, request.user)
+        message = f"{len(tickets)} ticket(s) Aptean associé(s) au ticket Monin #{feedback.pk}."
+        if feedback.status != status_before:  # rule T1 moved the status when a vendor ticket was linked
+            message += f" Le ticket Monin passe en « {FEEDBACK_STATUS_BY_CODE[feedback.status].label} »."
+        messages.success(request, message)
+        return redirect("feedback_detail", pk=pk)
+    return render(
+        request,
+        "tracker/vendor_ticket_associate.html",
+        {**filtered_vendor_tickets(request), "feedback": feedback, "already": already},
+    )
+
+
+@staff_required
 def vendor_ticket_create(request):
     """
     Staff creates a vendor ticket. With `?feedback=<id>`: form prefilled from that feedback (page, tab, Jira-format

@@ -1,0 +1,31 @@
+<form method="get" data-list-filters class="row g-2 mb-3">
+  <input type="hidden" name="sort" value="{{ sort }}">
+  <input type="hidden" name="order" value="{{ order }}">
+  <div class="col-auto">
+    <select name="status" data-autosubmit class="form-select">
+      <option value="">Tous statuts Aptean</option>
+      {% for s in statuses %}<option value="{{ s.code }}" {% if filters.status == s.code %}selected{% endif %}>{{ s.label }}</option>{% endfor %}
+      <option value="none" {% if filters.status == 'none' %}selected{% endif %}>Sans statut</option>
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="linked" data-autosubmit class="form-select">
+      <option value="">Liés ou non à un ticket Monin</option>
+      <option value="no" {% if filters.linked == 'no' %}selected{% endif %}>Sans ticket Monin lié</option>
+      <option value="yes" {% if filters.linked == 'yes' %}selected{% endif %}>Avec ticket Monin lié</option>
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="page" data-autosubmit data-reset-field="tab" class="form-select">
+      <option value="">Toutes pages</option>
+      {% for p in pages %}<option value="{{ p }}" {% if filters.page == p %}selected{% endif %}>{{ p }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="tab" data-autosubmit class="form-select">
+      <option value="">Tous onglets</option>
+      {% for t in tabs %}<option value="{{ t }}" {% if filters.tab == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-auto"><input name="q" value="{{ filters.q }}" class="form-control" placeholder="Référence, page, texte... (3 car. min.)" autocomplete="off"></div>
+</form>

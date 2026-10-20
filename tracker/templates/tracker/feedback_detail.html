@@ -39,7 +39,8 @@
     <dt class="col-sm-3">Soumis le</dt><dd class="col-sm-9">{{ feedback.created_at|date:"d/m/Y H:i" }}</dd>
     <dt class="col-sm-3">Tickets Aptean</dt>
     <dd class="col-sm-9">
-      {% for t in vendor_tickets %}<span class="badge text-bg-{% if t.status_info %}{{ t.status_info.color }}{% else %}light border{% endif %} me-1">{{ t.label }}</span>{% empty %}—{% endfor %}
+      {% for t in vendor_tickets %}<a href="{% url 'vendor_ticket_detail' t.pk %}" class="badge text-bg-{% if t.status_info %}{{ t.status_info.color }}{% else %}light border{% endif %} text-decoration-none me-1">{{ t.label }}</a>{% empty %}—{% endfor %}
+      {% if user.is_staff %}<a href="{% url 'vendor_ticket_associate' feedback.pk %}" class="btn btn-sm btn-outline-secondary ms-2">Associer des tickets Aptean</a>{% endif %}
     </dd>
   </dl>
 </div>

@@ -10,6 +10,7 @@ urlpatterns = [
     path("feedbacks/<int:pk>/triage/", feedbacks.feedback_triage, name="feedback_triage"),
     path("feedbacks/<int:pk>/comment/", feedbacks.add_comment, name="add_comment"),
     path("feedbacks/<int:pk>/retest/", feedbacks.retest, name="retest"),
+    path("feedbacks/<int:pk>/associate/", vendor_tickets.vendor_ticket_associate, name="vendor_ticket_associate"),
     path("vendor-tickets/", vendor_tickets.vendor_ticket_list, name="vendor_ticket_list"),
     path("vendor-tickets/new/", vendor_tickets.vendor_ticket_create, name="vendor_ticket_create"),
     path("vendor-tickets/<int:pk>/", vendor_tickets.vendor_ticket_detail, name="vendor_ticket_detail"),

@@ -1,0 +1,34 @@
+<table class="table table-sm table-hover bg-white align-middle">
+  <thead><tr>
+    {% if selection %}<th></th>{% endif %}
+    {% include "tracker/_sortable_th.html" with key="ref" title="Référence" %}
+    {% include "tracker/_sortable_th.html" with key="title" title="Titre" %}
+    {% include "tracker/_sortable_th.html" with key="description" title="Description" %}
+    {% include "tracker/_sortable_th.html" with key="page" title="Page" %}
+    {% include "tracker/_sortable_th.html" with key="tab" title="Onglet" %}
+    {% include "tracker/_sortable_th.html" with key="status" title="Statut chez Aptean" %}
+    {% include "tracker/_sortable_th.html" with key="date" title="Créé le" %}
+    {% include "tracker/_sortable_th.html" with key="feedbacks" title="Tickets Monin liés" %}
+    {% if user.is_staff %}<th></th>{% endif %}
+  </tr></thead>
+  <tbody>
+  {% for t in tickets %}
+    <tr>
+      {% if selection %}
+      <td>{% if t.pk in already %}<span class="badge text-bg-light border">déjà associé</span>{% else %}<input type="checkbox" class="form-check-input assoc-cb" name="tickets" value="{{ t.pk }}">{% endif %}</td>
+      {% endif %}
+      <td><a href="{% url 'vendor_ticket_detail' t.pk %}">{{ t.label }}</a></td>
+      <td style="min-width: 180px">{{ t.title }}</td>
+      <td style="min-width: 260px">{{ t.description|truncatechars:120 }}</td>
+      <td>{{ t.page }}</td>
+      <td>{{ t.tab }}</td>
+      <td>{% if t.status_info %}<span class="badge text-bg-{{ t.status_info.color }}">{{ t.status_info.label }}</span>{% endif %}</td>
+      <td>{% if t.created_on %}{{ t.created_on|date:"d/m/Y" }}{% endif %}</td>
+      <td>{% for f in t.feedbacks.all %}<a href="{% url 'feedback_detail' f.pk %}" class="badge text-bg-{{ f.status_info.color }} text-decoration-none me-1" title="{{ f.status_info.label }}">#{{ f.pk }}</a>{% endfor %}</td>
+      {% if user.is_staff %}<td>{% if t.link %}<a href="{{ t.link }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary">Jira ↗</a>{% endif %}</td>{% endif %}
+    </tr>
+  {% empty %}
+    <tr><td colspan="{% if selection %}10{% elif user.is_staff %}9{% else %}8{% endif %}" class="text-center text-muted">Aucun ticket Aptean.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
