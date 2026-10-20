@@ -1,4 +1,5 @@
 {% extends "tracker/base.html" %}
+{% load static %}
 {% block content %}
 <style>
   .desc-clamp { white-space: pre-line; cursor: pointer; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
@@ -9,36 +10,36 @@
   <a href="{% url 'feedback_create' %}" class="btn btn-primary">+ Nouveau ticket</a>
 </div>
 
-<form method="get" class="row g-2 mb-3">
+<form method="get" data-list-filters class="row g-2 mb-3">
   <input type="hidden" name="sort" value="{{ sort }}">
   <input type="hidden" name="order" value="{{ order }}">
   <div class="col-auto">
-    <select name="author" class="form-select" onchange="this.form.submit()">
+    <select name="author" class="form-select" data-autosubmit>
       <option value="me" {% if filters.author == 'me' %}selected{% endif %}>Mes tickets</option>
       <option value="" {% if filters.author == '' %}selected{% endif %}>Tous les auteurs</option>
       {% for u in authors %}<option value="{{ u.pk }}" {% if filters.author == u.pk|stringformat:'s' %}selected{% endif %}>{{ u.username }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-auto">
-    <select name="type" class="form-select" onchange="this.form.submit()">
+    <select name="type" class="form-select" data-autosubmit>
       <option value="">Tous types</option>
       {% for value, label in types %}<option value="{{ value }}" {% if filters.type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-auto">
-    <select name="status" class="form-select" onchange="this.form.submit()">
+    <select name="status" class="form-select" data-autosubmit>
       <option value="">Tous statuts</option>
       {% for s in statuses %}<option value="{{ s.code }}" {% if filters.status == s.code %}selected{% endif %}>{{ s.label }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-auto">
-    <select name="page" class="form-select" onchange="this.form.elements['tab'].value=''; this.form.submit()">
+    <select name="page" class="form-select" data-autosubmit data-reset-field="tab">
       <option value="">Toutes pages</option>
       {% for p in pages %}<option value="{{ p }}" {% if filters.page == p %}selected{% endif %}>{{ p }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-auto">
-    <select name="tab" class="form-select" onchange="this.form.submit()">
+    <select name="tab" class="form-select" data-autosubmit>
       <option value="">Tous onglets</option>
       {% for t in tabs %}<option value="{{ t }}" {% if filters.tab == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
     </select>
@@ -77,31 +78,5 @@
   </tbody>
 </table>
 
-<script>
-  document.querySelectorAll(".desc-clamp").forEach(function (el) {
-    el.addEventListener("click", function () {
-      if (window.getSelection().toString()) return;  // do not collapse while selecting text
-      el.classList.toggle("open");
-    });
-  });
-
-  const form = document.querySelector("form[method=get]");
-  const q = form.elements["q"];
-  let timer;
-  q.addEventListener("input", () => {
-    clearTimeout(timer);
-    const n = q.value.trim().length;
-    if (n === 0 || n >= 3) {
-      timer = setTimeout(() => {
-        sessionStorage.setItem("refocusQ", "1");
-        form.submit();
-      }, 350);
-    }
-  });
-  if (sessionStorage.getItem("refocusQ")) {
-    sessionStorage.removeItem("refocusQ");
-    q.focus();
-    q.setSelectionRange(q.value.length, q.value.length);
-  }
-</script>
 {% endblock %}
+{% block scripts %}<script src="{% static 'tracker/list_filters.js' %}"></script><script src="{% static 'tracker/desc_clamp.js' %}"></script>{% endblock %}
