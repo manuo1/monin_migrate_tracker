@@ -4,6 +4,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h1 class="display-6 fw-bold m-0">Tickets Aptean</h1>
+  {% if user.is_staff %}<a href="{% url 'vendor_ticket_create' %}" class="btn btn-primary">Nouveau ticket Aptean</a>{% endif %}
 </div>
 
 <form method="get" data-list-filters class="row g-2 mb-3">

@@ -1,13 +1,15 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Case, Count, F, IntegerField, Q, Value, When
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 
 from .. import services
 from ..forms import VendorTicketForm
-from ..models import VendorTicket
-from ..statuses import VENDOR_STATUS_BY_CODE, VENDOR_STATUSES
+from ..models import Feedback, VendorTicket
+from ..statuses import FEEDBACK_STATUS_BY_CODE, VENDOR_IN_PROGRESS, VENDOR_STATUS_BY_CODE, VENDOR_STATUSES
 from .common import distinct_page_and_tab_values, staff_required
 
 # Sortable list columns: URL key -> ORM field.
@@ -108,6 +110,42 @@ def vendor_ticket_detail(request, pk):
             "events": ticket.events.select_related("author").order_by("-date", "-pk"),
             "back_url": request.session.get("vendor_ticket_list_url") or reverse("vendor_ticket_list"),
         },
+    )
+
+
+@staff_required
+def vendor_ticket_create(request):
+    """
+    Staff creates a vendor ticket. With `?feedback=<id>`: form prefilled from that feedback (page, tab, Jira-format
+    description, status "in progress", today's date), Jira reference mandatory, and the new ticket is linked to it.
+    """
+    pk = request.GET.get("feedback", "")
+    source = Feedback.objects.filter(pk=pk).first() if pk.isdigit() else None
+    initial = {"ref": settings.JIRA_REF_PREFIX}
+    if source:
+        initial.update(
+            page=source.page,
+            tab=source.tab,
+            title=f"{source.page} {source.tab}".strip(),
+            description=services.build_vendor_description(source),
+            status=VENDOR_IN_PROGRESS,
+            created_on=timezone.localdate(),
+        )
+    form = VendorTicketForm(request.POST or None, initial=initial, ref_required=source is not None)
+    if request.method == "POST" and form.is_valid():
+        status_before = source.status if source else None
+        ticket = services.create_vendor_ticket(author=request.user, source=source, **form.cleaned_data)
+        message = "Ticket Aptean créé."
+        if source:
+            message = f"Ticket Aptean créé et lié au ticket Monin #{source.pk}."
+            if source.status != status_before:  # rule T1 moved the status when the vendor ticket was linked
+                message += f" Le ticket Monin passe en « {FEEDBACK_STATUS_BY_CODE[source.status].label} »."
+        messages.success(request, message)
+        return redirect("vendor_ticket_detail", pk=ticket.pk)
+    return render(
+        request,
+        "tracker/vendor_ticket_create.html",
+        {"form": form, "source": source, "jira_form_url": settings.JIRA_CREATE_FORM_URL},
     )
 
 

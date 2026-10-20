@@ -154,7 +154,7 @@ class VendorTicketForm(forms.ModelForm):
             "created_on": "Date de création chez Aptean",
         }
         widgets = {
-            "ref": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off"}),
+            "ref": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", "data-focus-end": ""}),
             "title": forms.TextInput(attrs={"class": SMALL, **SPELLCHECK}),
             "description": forms.Textarea(attrs={"class": SMALL, "rows": 10, **SPELLCHECK}),
             "page": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", **SPELLCHECK}),
@@ -163,10 +163,19 @@ class VendorTicketForm(forms.ModelForm):
             "created_on": forms.DateInput(attrs={"class": SMALL, "type": "date"}, format="%Y-%m-%d"),
         }
 
+    def __init__(self, *args, ref_required=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        if ref_required:
+            # Creation from a feedback: the Jira ticket is created at the same time, its number is typed here.
+            self.fields["ref"].required = True
+            self.fields["ref"].label = "Référence Jira"
+
     def clean_ref(self):
         """The bare Jira prefix (number not typed yet) is not a reference; empty means no reference (NULL)."""
         ref = (self.cleaned_data.get("ref") or "").strip()
         if ref == settings.JIRA_REF_PREFIX:
+            if self.fields["ref"].required:
+                raise forms.ValidationError(f"Indiquez le numéro du ticket après « {settings.JIRA_REF_PREFIX} ».")
             return None
         return ref or None
 
