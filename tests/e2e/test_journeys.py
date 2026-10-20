@@ -93,6 +93,8 @@ def test_staff_creates_a_vendor_ticket_from_a_feedback(page, live_server, staff,
     page.goto(f"{live_server.url}/feedbacks/{feedback.pk}/")
 
     page.get_by_role("link", name="Créer le ticket Aptean").click()
+    # A click only waits for the navigation to start: wait for the scripts (CDN included) before typing.
+    page.wait_for_load_state()
     page.fill("#id_ref", "TEST-321")
     # The link is rebuilt live from the reference (jira_link.js).
     expect(page.locator("#id_url")).to_have_value("https://jira.example.com/browse/TEST-321")
