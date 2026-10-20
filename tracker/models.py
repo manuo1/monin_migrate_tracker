@@ -12,6 +12,34 @@ from .statuses import (
 )
 
 
+class Page(models.Model):
+    """Reference list entry: a page of the migrated application. A suggestion only, free text stays allowed."""
+
+    name = models.CharField(max_length=200, unique=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "page"
+        verbose_name_plural = "pages"
+
+    def __str__(self):
+        return self.name
+
+
+class Tab(models.Model):
+    """Reference list entry: a tab of a page of the migrated application. A suggestion only."""
+
+    name = models.CharField(max_length=200, unique=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "onglet"
+        verbose_name_plural = "onglets"
+
+    def __str__(self):
+        return self.name
+
+
 class VendorTicket(models.Model):
     """A ticket of the vendor's Jira (displayed as "Aptean" in the interface)."""
 

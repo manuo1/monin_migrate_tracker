@@ -1,0 +1,9 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <p>Une valeur par ligne (première colonne). Les doublons et valeurs déjà présentes sont ignorés.</p>
+  <input type="submit" value="Importer" class="default">
+</form>
+{% endblock %}
