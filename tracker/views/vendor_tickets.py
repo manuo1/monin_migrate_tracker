@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import Case, Count, F, IntegerField, Q, Value, When
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 
 from ..models import VendorTicket
 from ..statuses import VENDOR_STATUS_BY_CODE, VENDOR_STATUSES
@@ -90,3 +91,18 @@ def vendor_ticket_list(request):
     # Remember the list (filters + sort) for the "back" button of the vendor ticket pages.
     request.session["vendor_ticket_list_url"] = request.get_full_path()
     return render(request, "tracker/vendor_ticket_list.html", filtered_vendor_tickets(request))
+
+
+@login_required
+def vendor_ticket_detail(request, pk):
+    ticket = get_object_or_404(VendorTicket, pk=pk)
+    return render(
+        request,
+        "tracker/vendor_ticket_detail.html",
+        {
+            "ticket": ticket,
+            "feedbacks": ticket.feedbacks.select_related("author"),
+            "events": ticket.events.select_related("author").order_by("-date", "-pk"),
+            "back_url": request.session.get("vendor_ticket_list_url") or reverse("vendor_ticket_list"),
+        },
+    )

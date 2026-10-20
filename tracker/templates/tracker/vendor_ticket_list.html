@@ -53,7 +53,7 @@
   <tbody>
   {% for t in tickets %}
     <tr>
-      <td>{{ t.label }}</td>
+      <td><a href="{% url 'vendor_ticket_detail' t.pk %}">{{ t.label }}</a></td>
       <td style="min-width: 180px">{{ t.title }}</td>
       <td style="min-width: 260px">{{ t.description|truncatechars:120 }}</td>
       <td>{{ t.page }}</td>

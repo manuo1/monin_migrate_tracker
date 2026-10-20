@@ -11,6 +11,7 @@ urlpatterns = [
     path("feedbacks/<int:pk>/comment/", feedbacks.add_comment, name="add_comment"),
     path("feedbacks/<int:pk>/retest/", feedbacks.retest, name="retest"),
     path("vendor-tickets/", vendor_tickets.vendor_ticket_list, name="vendor_ticket_list"),
+    path("vendor-tickets/<int:pk>/", vendor_tickets.vendor_ticket_detail, name="vendor_ticket_detail"),
     path("attachments/<int:pk>/", attachments.attachment_file, name="attachment_file"),
     path("feedbacks/<int:pk>/attachments/", attachments.add_attachments, name="add_attachments"),
     path(

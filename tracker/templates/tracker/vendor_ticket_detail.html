@@ -1,0 +1,51 @@
+{% extends "tracker/base.html" %}
+{% block title %}Ticket Aptean {{ ticket.label }}{% endblock %}
+{% block content %}
+<a href="{{ back_url }}" class="btn btn-sm btn-outline-secondary mb-3">← Retour à la liste des tickets Aptean</a>
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <div>
+    <h1 class="h4 m-0">{{ ticket.label }} · {% if ticket.page %}{{ ticket.page }}{% else %}<span class="text-muted">page non renseignée</span>{% endif %}{% if ticket.tab %} &rsaquo; {{ ticket.tab }}{% endif %}</h1>
+    {% if ticket.title %}<div class="fw-semibold mt-1">{{ ticket.title }}</div>{% endif %}
+    <div class="text-muted small">Ticket Aptean{% if ticket.created_on %}, créé le {{ ticket.created_on|date:"d/m/Y" }}{% endif %}</div>
+  </div>
+  <div>
+    {% if user.is_staff and ticket.link %}<a href="{{ ticket.link }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary me-2">Jira ↗</a>{% endif %}
+    {% if ticket.status_info %}<span class="badge text-bg-{{ ticket.status_info.color }} fs-6">{{ ticket.status_info.label }}</span>{% endif %}
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card mb-3"><div class="card-body">
+      <div style="white-space: pre-wrap">{% if ticket.description %}{{ ticket.description }}{% else %}<span class="text-muted">Aucune description.</span>{% endif %}</div>
+    </div></div>
+
+    <h2 class="h6">Historique</h2>
+    {% for e in events %}
+      <div class="small text-muted border-start border-2 ps-2 mb-2">
+        {{ e.date|date:"d/m/Y H:i" }} · {{ e.author.username }} · <span class="text-body">{{ e.text }}</span>
+      </div>
+    {% empty %}
+      <p class="text-muted">Aucun événement.</p>
+    {% endfor %}
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card mb-3"><div class="card-body small">
+      <strong>Tickets Monin liés :</strong>
+      {% if not feedbacks %}<span class="text-muted">aucun ticket lié</span>{% endif %}
+      <ul class="list-unstyled mb-0 mt-1">
+      {% for f in feedbacks %}
+        <li class="mb-2">
+          <a href="{% url 'feedback_detail' f.pk %}">#{{ f.pk }}</a>
+          <span class="badge text-bg-{{ f.status_info.color }}">{{ f.status_info.label }}</span>
+          <div class="text-muted">{{ f.get_type_display }} · {{ f.page }}{% if f.tab %} &rsaquo; {{ f.tab }}{% endif %}</div>
+          <div class="text-muted">{{ f.description|truncatechars:80 }}</div>
+        </li>
+      {% endfor %}
+      </ul>
+    </div></div>
+  </div>
+</div>
+{% endblock %}
