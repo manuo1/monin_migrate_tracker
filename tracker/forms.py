@@ -165,6 +165,14 @@ class VendorTicketForm(forms.ModelForm):
 
     def __init__(self, *args, ref_required=False, **kwargs):
         super().__init__(*args, **kwargs)
+        # Read by static/tracker/jira_link.js to keep the link field in sync while the reference is typed.
+        self.fields["ref"].widget.attrs.update(
+            {
+                "data-jira-base": settings.JIRA_BASE_URL,
+                "data-ref-prefix": settings.JIRA_REF_PREFIX,
+                "data-link-target": self["url"].id_for_label,
+            }
+        )
         if ref_required:
             # Creation from a feedback: the Jira ticket is created at the same time, its number is typed here.
             self.fields["ref"].required = True
