@@ -3,8 +3,8 @@ from playwright.sync_api import expect
 
 from tests.tracker.factories import FeedbackFactory, VendorTicketFactory
 from tracker.choices import FeedbackType
-from tracker.models import Feedback
-from tracker.statuses import CLOSED, SENT_TO_VENDOR
+from tracker.models import Feedback, VendorTicket
+from tracker.statuses import CLOSED, RETEST_USER, SENT_TO_VENDOR
 
 pytestmark = pytest.mark.e2e
 
@@ -52,3 +52,55 @@ def test_staff_triages_a_feedback_then_closes_it(page, live_server, staff, login
     expect(page.get_by_text("Corrigé dans la nouvelle version").first).to_be_visible()
     feedback.refresh_from_db()
     assert (feedback.status, feedback.closure_reason) == (CLOSED, "fixed")
+
+
+def test_author_answers_a_retest_ok(page, live_server, user, login):
+    feedback = FeedbackFactory(author=user, status=RETEST_USER)
+    login(page, user)
+    page.goto(f"{live_server.url}/feedbacks/{feedback.pk}/")
+
+    page.get_by_role("button", name="Test OK").click()
+
+    expect(page.get_by_text("Retest demandé")).to_have_count(0)
+    feedback.refresh_from_db()
+    assert (feedback.status, feedback.closure_reason) == ("test_passed", "fixed")
+
+
+def test_author_answers_a_retest_ko_comment_is_mandatory(page, live_server, user, login):
+    feedback = FeedbackFactory(author=user, status=RETEST_USER)
+    login(page, user)
+    page.goto(f"{live_server.url}/feedbacks/{feedback.pk}/")
+
+    # Without a comment the answer is refused server-side and nothing changes.
+    with page.expect_navigation():
+        page.get_by_role("button", name="Test KO").click()
+    feedback.refresh_from_db()
+    assert feedback.status == RETEST_USER
+    expect(page.get_by_text("Retest demandé")).to_be_visible()
+
+    page.fill("textarea[name='comment']", "Le montant est toujours faux")
+    page.get_by_role("button", name="Test KO").click()
+
+    expect(page.get_by_text("Retest demandé")).to_have_count(0)
+    expect(page.get_by_text("Le montant est toujours faux").first).to_be_visible()
+    feedback.refresh_from_db()
+    assert feedback.status == "test_failed"
+
+
+def test_staff_creates_a_vendor_ticket_from_a_feedback(page, live_server, staff, login):
+    feedback = FeedbackFactory(page="Clients", tab="Adresses")
+    login(page, staff)
+    page.goto(f"{live_server.url}/feedbacks/{feedback.pk}/")
+
+    page.get_by_role("link", name="Créer le ticket Aptean").click()
+    page.fill("#id_ref", "TEST-321")
+    # The link is rebuilt live from the reference (jira_link.js).
+    expect(page.locator("#id_url")).to_have_value("https://jira.example.com/browse/TEST-321")
+    page.get_by_role("button", name="Enregistrer").click()
+
+    expect(page.get_by_text("Le ticket Monin passe en").first).to_be_visible()
+    ticket = VendorTicket.objects.get()
+    assert (ticket.ref, ticket.url) == ("TEST-321", "https://jira.example.com/browse/TEST-321")
+    feedback.refresh_from_db()
+    assert list(feedback.vendor_tickets.all()) == [ticket]
+    assert feedback.status == SENT_TO_VENDOR
