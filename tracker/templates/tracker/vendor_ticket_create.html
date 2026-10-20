@@ -36,4 +36,5 @@
 </form>
 {% endblock %}
 {% block scripts %}<script src="{% static 'tracker/vendor_ticket_form.js' %}"></script>
-<script src="{% static 'tracker/jira_link.js' %}"></script>{% endblock %}
+<script src="{% static 'tracker/jira_link.js' %}"></script>
+{% include "tracker/_reference_lists.html" %}{% endblock %}

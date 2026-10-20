@@ -1,0 +1,12 @@
+{% load static %}
+{# Page and tab inputs (list="reference-pages" / list="reference-tabs"): reference list with search (Tom Select), free entry always allowed. #}
+{# The datalists below provide the values (and the fallback without JS). The lists are edited in the Django admin only. #}
+{# For staff, a value outside the list is highlighted (data-staff). #}
+<div id="reference-lists" data-staff="{{ user.is_staff|yesno:'true,false' }}" hidden>
+  <datalist id="reference-pages">{% for n in ref_pages %}<option value="{{ n }}">{% endfor %}</datalist>
+  <datalist id="reference-tabs">{% for n in ref_tabs %}<option value="{{ n }}">{% endfor %}</datalist>
+</div>
+{# TODO (hardening): serve Tom Select from local static files instead of the CDN, to allow a strict CSP. #}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script src="{% static 'tracker/reference_lists.js' %}"></script>

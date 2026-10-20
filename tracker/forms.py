@@ -8,6 +8,9 @@ from .statuses import FEEDBACK_STATUS_CHOICES
 # Enables the browser spell checker (French) on free-text fields.
 SPELLCHECK = {"spellcheck": "true", "lang": "fr"}
 SMALL = "form-control form-control-sm"
+# Page/tab inputs use the reference datalists of _reference_lists.html (see static/tracker/reference_lists.js).
+PAGES_LIST = "reference-pages"
+TABS_LIST = "reference-tabs"
 
 
 class CommentForm(forms.ModelForm):
@@ -57,8 +60,12 @@ class FeedbackForm(forms.ModelForm):
         }
         widgets = {
             "type": forms.Select(attrs={"class": "form-select"}),
-            "page": forms.TextInput(attrs={"class": "form-control", "autocomplete": "off", **SPELLCHECK}),
-            "tab": forms.TextInput(attrs={"class": "form-control", "autocomplete": "off", **SPELLCHECK}),
+            "page": forms.TextInput(
+                attrs={"class": "form-control", "autocomplete": "off", "list": PAGES_LIST, **SPELLCHECK}
+            ),
+            "tab": forms.TextInput(
+                attrs={"class": "form-control", "autocomplete": "off", "list": TABS_LIST, **SPELLCHECK}
+            ),
             "article_id": forms.TextInput(attrs={"class": "form-control"}),
             "description": forms.Textarea(attrs={"class": "form-control", "rows": 5, **SPELLCHECK}),
         }
@@ -92,8 +99,8 @@ class FeedbackStaffForm(forms.ModelForm):
         labels = {"type": "Type", "page": "Page", "tab": "Onglet", "article_id": "Article testé"}
         widgets = {
             "type": forms.Select(attrs={"class": "form-select form-select-sm"}),
-            "page": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", **SPELLCHECK}),
-            "tab": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", **SPELLCHECK}),
+            "page": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", "list": PAGES_LIST, **SPELLCHECK}),
+            "tab": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", "list": TABS_LIST, **SPELLCHECK}),
             "article_id": forms.TextInput(attrs={"class": SMALL}),
         }
 
@@ -157,8 +164,8 @@ class VendorTicketForm(forms.ModelForm):
             "ref": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", "data-focus-end": ""}),
             "title": forms.TextInput(attrs={"class": SMALL, **SPELLCHECK}),
             "description": forms.Textarea(attrs={"class": SMALL, "rows": 10, **SPELLCHECK}),
-            "page": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", **SPELLCHECK}),
-            "tab": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", **SPELLCHECK}),
+            "page": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", "list": PAGES_LIST, **SPELLCHECK}),
+            "tab": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", "list": TABS_LIST, **SPELLCHECK}),
             "status": forms.Select(attrs={"class": "form-select form-select-sm"}),
             "created_on": forms.DateInput(attrs={"class": SMALL, "type": "date"}, format="%Y-%m-%d"),
         }
