@@ -2,6 +2,7 @@
 {% block title %}Ticket Aptean {{ ticket.label }}{% endblock %}
 {% block content %}
 <a href="{{ back_url }}" class="btn btn-sm btn-outline-secondary mb-3">← Retour à la liste des tickets Aptean</a>
+{% if user.is_staff %}<a href="{% url 'vendor_ticket_edit' ticket.pk %}" class="btn btn-sm btn-outline-primary mb-3 ms-2">Modifier</a>{% endif %}
 
 <div class="d-flex justify-content-between align-items-start mb-3">
   <div>

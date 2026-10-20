@@ -1,11 +1,14 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Case, Count, F, IntegerField, Q, Value, When
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
+from .. import services
+from ..forms import VendorTicketForm
 from ..models import VendorTicket
 from ..statuses import VENDOR_STATUS_BY_CODE, VENDOR_STATUSES
-from .common import distinct_page_and_tab_values
+from .common import distinct_page_and_tab_values, staff_required
 
 # Sortable list columns: URL key -> ORM field.
 SORT_FIELDS = {
@@ -106,3 +109,22 @@ def vendor_ticket_detail(request, pk):
             "back_url": request.session.get("vendor_ticket_list_url") or reverse("vendor_ticket_list"),
         },
     )
+
+
+@staff_required
+def vendor_ticket_edit(request, pk):
+    """Staff edits a vendor ticket; each changed field is traced."""
+    ticket = get_object_or_404(VendorTicket, pk=pk)
+    if request.method == "POST":
+        before = VendorTicket.objects.get(pk=pk)  # the form mutates `ticket`: keep an untouched copy to diff against
+        form = VendorTicketForm(request.POST, instance=ticket)
+        if form.is_valid():
+            changes = services.save_vendor_ticket(before, form.instance, request.user)
+            if changes:
+                messages.success(request, f"Ticket Aptean modifié ({changes} changement(s)).")
+            else:
+                messages.info(request, "Aucune modification.")
+            return redirect("vendor_ticket_detail", pk=pk)
+    else:
+        form = VendorTicketForm(instance=ticket)
+    return render(request, "tracker/vendor_ticket_edit.html", {"form": form, "ticket": ticket})

@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 
 from .choices import ClosureReason, FeedbackType
 from .models import Comment, Feedback, VendorTicket
@@ -126,3 +127,52 @@ class TriageForm(forms.Form):
         label="Explication (publiée en commentaire)",
         widget=forms.Textarea(attrs={"class": SMALL, "rows": 3, **SPELLCHECK}),
     )
+
+
+class VendorTicketForm(forms.ModelForm):
+    """Manual edit of a vendor ticket by staff (each change is traced).
+
+    The link is always derived from the Jira reference when there is one; without a reference it is kept as typed.
+    """
+
+    # Explicit scheme assumption (the Django 6.0 default), which also silences the Django 5.x deprecation warning.
+    url = forms.URLField(
+        required=False, assume_scheme="https", label="Lien", widget=forms.URLInput(attrs={"class": SMALL})
+    )
+
+    class Meta:
+        model = VendorTicket
+        fields = ["ref", "title", "description", "page", "tab", "status", "url", "created_on"]
+        labels = {
+            "ref": "Référence Jira (à saisir une fois le ticket créé dans Jira)",
+            "title": "Titre du problème",
+            "description": "Description",
+            "page": "Page",
+            "tab": "Onglet",
+            "status": "Statut chez Aptean",
+            "url": "Lien",
+            "created_on": "Date de création chez Aptean",
+        }
+        widgets = {
+            "ref": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off"}),
+            "title": forms.TextInput(attrs={"class": SMALL, **SPELLCHECK}),
+            "description": forms.Textarea(attrs={"class": SMALL, "rows": 10, **SPELLCHECK}),
+            "page": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", **SPELLCHECK}),
+            "tab": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", **SPELLCHECK}),
+            "status": forms.Select(attrs={"class": "form-select form-select-sm"}),
+            "created_on": forms.DateInput(attrs={"class": SMALL, "type": "date"}, format="%Y-%m-%d"),
+        }
+
+    def clean_ref(self):
+        """The bare Jira prefix (number not typed yet) is not a reference; empty means no reference (NULL)."""
+        ref = (self.cleaned_data.get("ref") or "").strip()
+        if ref == settings.JIRA_REF_PREFIX:
+            return None
+        return ref or None
+
+    def clean(self):
+        cleaned = super().clean()
+        ref = cleaned.get("ref")
+        if ref:
+            cleaned["url"] = settings.JIRA_BASE_URL + ref
+        return cleaned
