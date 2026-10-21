@@ -1,3 +1,4 @@
+import codecs
 import csv
 import io
 
@@ -104,12 +105,26 @@ class CsvImportForm(forms.Form):
     file = forms.FileField(label="Fichier CSV (une valeur par ligne, première colonne)")
 
 
+class CsvFormatError(ValueError):
+    """The uploaded file is not a readable CSV: the message is shown to the user."""
+
+
+def decode_csv(raw):
+    if raw.startswith(b"PK\x03\x04"):
+        raise CsvFormatError("Ce fichier est un classeur Excel (.xlsx) : exportez-le en CSV, puis réimportez-le.")
+    # utf-8 (BOM allowed), cp1252 (Excel on Windows), utf-16 (Excel "Unicode text", recognised by its BOM)
+    bom_utf16 = raw.startswith((codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE))
+    for encoding in ["utf-16"] if bom_utf16 else ["utf-8-sig", "cp1252"]:
+        try:
+            return raw.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+    raise CsvFormatError("Encodage non reconnu : enregistrez le fichier en CSV UTF-8, puis réimportez-le.")
+
+
 def read_csv_names(raw):
-    """First column of every non-empty line, stripped, without duplicates. utf-8 (BOM allowed) or Excel cp1252."""
-    try:
-        text = raw.decode("utf-8-sig")
-    except UnicodeDecodeError:
-        text = raw.decode("cp1252")  # CSV saved from Excel (Windows)
+    """First column of every non-empty line, stripped, without duplicates. utf-8 (BOM allowed), cp1252 or utf-16."""
+    text = decode_csv(raw)
     delimiter = ";" if ";" in text else ("\t" if "\t" in text else ",")
     rows = csv.reader(io.StringIO(text), delimiter=delimiter)
     return list(dict.fromkeys(row[0].strip() for row in rows if row and row[0].strip()))
@@ -130,14 +145,20 @@ class ReferenceAdmin(admin.ModelAdmin):
             raise PermissionDenied
         form = CsvImportForm(request.POST or None, request.FILES or None)
         if request.method == "POST" and form.is_valid():
-            names = read_csv_names(form.cleaned_data["file"].read())
-            valid = [n for n in names if len(n) <= NAME_MAX_LENGTH]
-            added = sum(self.model.objects.get_or_create(name=n)[1] for n in valid)
-            message = f"{added} valeur(s) ajoutée(s) ({len(valid) - added} déjà présente(s))."
-            if len(valid) < len(names):
-                message += f" {len(names) - len(valid)} valeur(s) ignorée(s) : plus de {NAME_MAX_LENGTH} caractères."
-            self.message_user(request, message, messages.SUCCESS)
-            return redirect("..")
+            try:
+                names = read_csv_names(form.cleaned_data["file"].read())
+            except CsvFormatError as error:
+                form.add_error("file", str(error))
+            else:
+                valid = [n for n in names if len(n) <= NAME_MAX_LENGTH]
+                added = sum(self.model.objects.get_or_create(name=n)[1] for n in valid)
+                message = f"{added} valeur(s) ajoutée(s) ({len(valid) - added} déjà présente(s))."
+                if len(valid) < len(names):
+                    message += (
+                        f" {len(names) - len(valid)} valeur(s) ignorée(s) : plus de {NAME_MAX_LENGTH} caractères."
+                    )
+                self.message_user(request, message, messages.SUCCESS)
+                return redirect("..")
         context = {
             **self.admin_site.each_context(request),
             "form": form,

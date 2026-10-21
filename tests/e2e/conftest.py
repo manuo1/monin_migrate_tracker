@@ -10,6 +10,15 @@ os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
 PASSWORD = "e2e-password"
 
 
+@pytest.fixture(autouse=True)
+def no_csp_violation(page):
+    """Fail any journey during which the browser reports a Content-Security-Policy violation."""
+    violations = []
+    page.on("console", lambda msg: violations.append(msg.text) if "Content Security Policy" in msg.text else None)
+    yield
+    assert not violations, violations
+
+
 def _make(factory):
     account = factory()
     account.set_password(PASSWORD)
