@@ -22,6 +22,7 @@ SETTING_NAMES = [
     "SECURE_CONTENT_TYPE_NOSNIFF",
     "SECURE_PROXY_SSL_HEADER",
     "LOGGING",
+    "MIDDLEWARE",
 ]
 
 # Variables a developer shell may already export: always cleared before each run.
@@ -84,6 +85,14 @@ def test_prod_hsts_and_redirect_can_be_tuned_by_env():
     s = json.loads(load_prod_settings(SECURE_HSTS_SECONDS="300", SECURE_SSL_REDIRECT="False").stdout)
     assert s["SECURE_HSTS_SECONDS"] == 300
     assert s["SECURE_SSL_REDIRECT"] is False
+
+
+def test_prod_serves_static_files_with_whitenoise_right_after_security_middleware():
+    middleware = json.loads(load_prod_settings().stdout)["MIDDLEWARE"]
+    assert middleware[:2] == [
+        "django.middleware.security.SecurityMiddleware",
+        "whitenoise.middleware.WhiteNoiseMiddleware",
+    ]
 
 
 def test_prod_refuses_to_start_without_allowed_hosts():

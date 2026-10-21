@@ -23,5 +23,9 @@ SILENCED_SYSTEM_CHECKS = [*SILENCED_SYSTEM_CHECKS, "security.W019", "security.W0
 if env.bool("BEHIND_PROXY", default=False):
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
+# Static files are served by the app itself (WhiteNoise) so the container needs no web server for them.
+# Attachments are NOT static: they go through the authenticated download view.
+MIDDLEWARE = [MIDDLEWARE[0], "whitenoise.middleware.WhiteNoiseMiddleware", *MIDDLEWARE[1:]]
+
 # Structured logs (one JSON object per line) unless LOG_FORMAT says otherwise.
 LOGGING["handlers"]["console"]["formatter"] = env.str("LOG_FORMAT", default="json")

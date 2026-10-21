@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mmt
+      POSTGRES_USER: mmt
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mmt -d mmt"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # POSTGRES_PASSWORD must be URL-safe (letters and digits) because it is embedded in this URL.
+      DATABASE_URL: postgres://mmt:${POSTGRES_PASSWORD}@db:5432/mmt
+      MEDIA_ROOT: /data/media
+    volumes:
+      - media:/data/media
+    depends_on:
+      db:
+        condition: service_healthy
+    # Bound to localhost: a reverse proxy (TLS) is expected in front. Set BEHIND_PROXY=True in .env.
+    ports:
+      - "127.0.0.1:8000:8000"
+
+volumes:
+  pgdata:
+  media:
