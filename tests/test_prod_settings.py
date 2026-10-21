@@ -16,6 +16,7 @@ SETTING_NAMES = [
     "SESSION_COOKIE_HTTPONLY",
     "SESSION_COOKIE_SAMESITE",
     "CSRF_COOKIE_SECURE",
+    "LANGUAGE_COOKIE_SECURE",
     "SECURE_HSTS_SECONDS",
     "SECURE_HSTS_INCLUDE_SUBDOMAINS",
     "SECURE_HSTS_PRELOAD",
@@ -65,6 +66,7 @@ def test_prod_defaults_are_secure():
     assert s["SESSION_COOKIE_HTTPONLY"] is True
     assert s["SESSION_COOKIE_SAMESITE"] == "Lax"
     assert s["CSRF_COOKIE_SECURE"] is True
+    assert s["LANGUAGE_COOKIE_SECURE"] is True
     assert s["SECURE_HSTS_SECONDS"] == 31536000
     assert s["SECURE_HSTS_INCLUDE_SUBDOMAINS"] is True
     assert s["SECURE_HSTS_PRELOAD"] is False

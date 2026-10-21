@@ -32,6 +32,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "tracker.middleware.CookieLocaleMiddleware",  # after sessions, before CommonMiddleware
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -86,7 +87,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-LANGUAGE_CODE = "fr-fr"
+# French is the default; only the switch (cookie) changes the language, the browser language is ignored.
+LANGUAGE_CODE = "fr"
+LANGUAGES = [("fr", "Français"), ("en", "English")]
+LOCALE_PATHS = [BASE_DIR / "locale"]
 TIME_ZONE = "Europe/Paris"
 USE_I18N = True
 USE_TZ = True

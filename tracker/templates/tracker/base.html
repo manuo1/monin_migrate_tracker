@@ -1,6 +1,7 @@
 <!doctype html>
-{% load static %}
-<html lang="fr">
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,6 +17,14 @@
       <a class="nav-link" href="{% url 'feedback_list' %}">Tickets Monin</a>
       <a class="nav-link" href="{% url 'vendor_ticket_list' %}">Tickets Aptean</a>
     </div>
+    {% endif %}
+    <form method="post" action="{% url 'set_language' %}" class="d-flex gap-1 {% if user.is_authenticated %}me-3{% else %}ms-auto{% endif %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button name="language" value="fr" class="btn btn-sm {% if LANGUAGE_CODE == 'fr' %}btn-light{% else %}btn-outline-light{% endif %}">FR</button>
+      <button name="language" value="en" class="btn btn-sm {% if LANGUAGE_CODE == 'en' %}btn-light{% else %}btn-outline-light{% endif %}">EN</button>
+    </form>
+    {% if user.is_authenticated %}
     <form method="post" action="{% url 'logout' %}" class="d-flex align-items-center gap-2">
       {% csrf_token %}
       {% if user.is_staff %}<a class="btn btn-sm btn-outline-light" href="{% url 'admin:index' %}" title="Administration Django (hors application)">⚙</a>{% endif %}

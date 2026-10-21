@@ -1,4 +1,27 @@
-"""Content-Security-Policy header for the application pages (Django 5.2 has no built-in CSP)."""
+"""Project middlewares: language selection (switch cookie only) and Content-Security-Policy header.
+
+Django 5.2 has no built-in CSP.
+"""
+
+import contextlib
+
+from django.conf import settings
+from django.middleware.locale import LocaleMiddleware
+from django.utils import translation
+
+
+class CookieLocaleMiddleware(LocaleMiddleware):
+    """Language = the switch cookie, else LANGUAGE_CODE. The browser's Accept-Language is deliberately ignored."""
+
+    def process_request(self, request):
+        language = settings.LANGUAGE_CODE
+        cookie = request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME)
+        if cookie:
+            with contextlib.suppress(LookupError):
+                language = translation.get_supported_language_variant(cookie)
+        translation.activate(language)
+        request.LANGUAGE_CODE = translation.get_language()
+
 
 # Strict on scripts (no inline JS, no CDN: everything is served from `static/`). Inline styles are still allowed:
 # templates use `style=` attributes. `blob:` in img-src is for the local thumbnails of the attachment dropzone.
