@@ -2,6 +2,7 @@ import pytest
 from django.urls import reverse
 
 from tests.tracker.factories import FeedbackFactory, StaffFactory, UserFactory, VendorTicketFactory
+from tracker import services
 from tracker.statuses import CLOSED, IN_ANALYSIS, NEW, RETEST_USER, SENT_TO_VENDOR
 
 pytestmark = pytest.mark.django_db
@@ -17,6 +18,7 @@ def _data(feedback, **overrides):
         "closure_reason": feedback.closure_reason,
         "explanation": "",
         "vendor_tickets": [t.pk for t in feedback.vendor_tickets.all()],
+        "state": services.triage_state(feedback),
     }
     data.update(overrides)
     return data

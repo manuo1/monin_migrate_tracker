@@ -134,6 +134,8 @@ class TriageForm(forms.Form):
         label="Explication (publiée en commentaire)",
         widget=forms.Textarea(attrs={"class": SMALL, "rows": 3, **SPELLCHECK}),
     )
+    # Optimistic locking: fingerprint of the feedback when the form was displayed (see services.triage_state).
+    state = forms.CharField(widget=forms.HiddenInput)
 
 
 class VendorTicketForm(forms.ModelForm):

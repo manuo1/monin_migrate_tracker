@@ -50,7 +50,8 @@
   {% csrf_token %}
   <strong class="mb-2">Triage</strong>
   {{ triage_form.non_field_errors }}
-  {% for field in triage_form %}
+  {% for field in triage_form.hidden_fields %}{{ field }}{% endfor %}
+  {% for field in triage_form.visible_fields %}
   <div class="mb-2">
     <label class="form-label small mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
     {{ field }}

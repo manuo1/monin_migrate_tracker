@@ -188,15 +188,22 @@ def feedback_detail(request, pk):
     return _render_detail(request, feedback)
 
 
-def _render_detail(request, feedback, retest_comment="", triage_form=None):
+def _triage_form(feedback, **extra_initial):
+    """Triage form prefilled with the current state; `state` is the optimistic-locking token."""
+    return TriageForm(
+        initial={
+            "status": feedback.status,
+            "closure_reason": feedback.closure_reason,
+            "vendor_tickets": feedback.vendor_tickets.all(),
+            "state": services.triage_state(feedback),
+            **extra_initial,
+        }
+    )
+
+
+def _render_detail(request, feedback, retest_comment="", triage_form=None, status=200):
     if request.user.is_staff and triage_form is None:
-        triage_form = TriageForm(
-            initial={
-                "status": feedback.status,
-                "closure_reason": feedback.closure_reason,
-                "vendor_tickets": feedback.vendor_tickets.all(),
-            }
-        )
+        triage_form = _triage_form(feedback)
     return render(
         request,
         "tracker/feedback_detail.html",
@@ -212,6 +219,7 @@ def _render_detail(request, feedback, retest_comment="", triage_form=None):
             "can_add_attachments": can_add_attachments(request.user, feedback),
             "back_url": request.session.get("feedback_list_url") or reverse("feedback_list"),
         },
+        status=status,
     )
 
 
@@ -240,14 +248,25 @@ def feedback_triage(request, pk):
         messages.error(request, "Triage invalide : vérifiez les champs.")
         return _render_detail(request, feedback, triage_form=form)
     data = form.cleaned_data
-    services.triage(
-        feedback,
-        request.user,
-        status=data["status"],
-        closure_reason=data["closure_reason"],
-        explanation=data["explanation"],
-        vendor_tickets=data["vendor_tickets"],
-    )
+    try:
+        services.triage(
+            feedback,
+            request.user,
+            status=data["status"],
+            closure_reason=data["closure_reason"],
+            explanation=data["explanation"],
+            vendor_tickets=data["vendor_tickets"],
+            expected_state=data["state"],
+        )
+    except services.StaleStateError:
+        feedback.refresh_from_db()
+        messages.error(
+            request,
+            "Ce ticket a été modifié entre-temps : rien n'a été enregistré. "
+            "Vérifiez l'état actuel puis recommencez (votre explication est conservée).",
+        )
+        triage_form = _triage_form(feedback, explanation=data["explanation"])
+        return _render_detail(request, feedback, triage_form=triage_form, status=409)
     message = "Ticket mis à jour."
     if feedback.status != data["status"]:  # rule T1 moved the status after the vendor link was added
         message += f" Le ticket passe en « {FEEDBACK_STATUS_BY_CODE[feedback.status].label} »."

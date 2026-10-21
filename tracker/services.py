@@ -4,11 +4,18 @@ user's retest). Everything else is free and manual: a status is changed by hand 
 Every history row goes through `history.py`: this module never writes an event itself.
 """
 
+import hashlib
+
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 
 from . import history, rules
 from .models import Comment, Feedback, VendorTicket
+
+
+class StaleStateError(Exception):
+    """The feedback changed (status, closure reason or vendor links) since the triage form was displayed."""
+
 
 # --- Feedbacks ---
 
@@ -70,9 +77,24 @@ def change_status(feedback, status, author, closure_reason="", explanation=""):
             Comment.objects.create(feedback=feedback, author=author, text=explanation.strip())
 
 
-def triage(feedback, author, *, status, closure_reason, explanation, vendor_tickets):
-    """Full update from the triage form, with a trace of each change."""
+def triage_state(feedback):
+    """Short fingerprint of what the triage form edits (status, closure reason, vendor links), read from the database"""
+    tickets = sorted(feedback.vendor_tickets.values_list("pk", flat=True))
+    raw = f"{feedback.status}|{feedback.closure_reason}|{tickets}"
+    return hashlib.sha256(raw.encode()).hexdigest()[:16]
+
+
+def triage(feedback, author, *, status, closure_reason, explanation, vendor_tickets, expected_state=None):
+    """
+    Full update from the triage form, with a trace of each change.
+    Optimistic locking: if `expected_state` (the `triage_state` shown with the form) no longer matches the database,
+    nothing is written and StaleStateError is raised. The row is locked (PostgreSQL) while the check and the write run.
+    """
     with transaction.atomic():
+        if expected_state is not None:
+            current = Feedback.objects.select_for_update().get(pk=feedback.pk)
+            if triage_state(current) != expected_state:
+                raise StaleStateError
         change_status(feedback, status, author, closure_reason=closure_reason, explanation=explanation)
         update_vendor_links(feedback, vendor_tickets, author)
 
