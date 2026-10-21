@@ -21,10 +21,19 @@ SETTING_NAMES = [
     "SECURE_HSTS_PRELOAD",
     "SECURE_CONTENT_TYPE_NOSNIFF",
     "SECURE_PROXY_SSL_HEADER",
+    "LOGGING",
 ]
 
 # Variables a developer shell may already export: always cleared before each run.
-CLEARED_ENV = ["BEHIND_PROXY", "SECURE_SSL_REDIRECT", "SECURE_HSTS_SECONDS", "ALLOWED_HOSTS", "DEBUG"]
+CLEARED_ENV = [
+    "BEHIND_PROXY",
+    "SECURE_SSL_REDIRECT",
+    "SECURE_HSTS_SECONDS",
+    "ALLOWED_HOSTS",
+    "DEBUG",
+    "LOG_FORMAT",
+    "LOG_LEVEL",
+]
 
 
 def load_prod_settings(**env_overrides):
@@ -81,3 +90,22 @@ def test_prod_refuses_to_start_without_allowed_hosts():
     result = load_prod_settings(ALLOWED_HOSTS="")
     assert result.returncode != 0
     assert "ALLOWED_HOSTS must be set in production" in result.stderr
+
+
+def test_prod_logs_json_to_stdout_at_info_by_default():
+    logging_config = json.loads(load_prod_settings().stdout)["LOGGING"]
+    assert logging_config["handlers"]["console"]["formatter"] == "json"
+    assert logging_config["root"]["level"] == "INFO"
+    assert logging_config["root"]["handlers"] == ["console"]
+
+
+def test_prod_log_format_and_level_can_be_tuned_by_env():
+    logging_config = json.loads(load_prod_settings(LOG_FORMAT="plain", LOG_LEVEL="warning").stdout)["LOGGING"]
+    assert logging_config["handlers"]["console"]["formatter"] == "plain"
+    assert logging_config["root"]["level"] == "WARNING"
+
+
+def test_an_unknown_log_format_is_refused():
+    result = load_prod_settings(LOG_FORMAT="xml")
+    assert result.returncode != 0
+    assert "LOG_FORMAT must be" in result.stderr

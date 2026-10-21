@@ -4,6 +4,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import environ
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -74,6 +75,9 @@ AXES_COOLOFF_TIME = timedelta(minutes=env.int("AXES_COOLOFF_MINUTES", default=15
 AXES_LOCKOUT_PARAMETERS = ["username"]
 AXES_RESET_ON_SUCCESS = True
 AXES_LOCKOUT_TEMPLATE = "registration/lockout.html"
+# axes.W006 (no 'ip_address' in the lockout parameters) is deliberate: the IP is unreliable behind a reverse proxy.
+# Known residual risk: password spraying (one attempt on many accounts) is not slowed down.
+SILENCED_SYSTEM_CHECKS = ["axes.W006"]
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -113,3 +117,23 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 JIRA_BASE_URL = env("JIRA_BASE_URL", default="")
 JIRA_CREATE_FORM_URL = env("JIRA_CREATE_FORM_URL", default="")
 JIRA_REF_PREFIX = env("JIRA_REF_PREFIX", default="")
+
+# Logging: everything goes to stdout (the process manager / container collects it).
+# LOG_FORMAT: "plain" (default, readable in development) or "json" (default in production, see prod.py).
+LOG_LEVEL = env.str("LOG_LEVEL", default="INFO").upper()
+LOG_FORMAT = env.str("LOG_FORMAT", default="plain")
+if LOG_FORMAT not in {"plain", "json"}:
+    raise ImproperlyConfigured('LOG_FORMAT must be "plain" or "json".')
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "plain": {"format": "%(asctime)s %(levelname)s %(name)s %(message)s"},
+        "json": {"()": "tracker.logs.JsonFormatter"},
+    },
+    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": LOG_FORMAT}},
+    "root": {"handlers": ["console"], "level": LOG_LEVEL},
+    # Replaces Django's default "django" logger (console only when DEBUG, mail_admins) to avoid duplicates.
+    "loggers": {"django": {"handlers": ["console"], "level": LOG_LEVEL, "propagate": False}},
+}
