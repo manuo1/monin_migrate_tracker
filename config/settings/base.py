@@ -1,5 +1,6 @@
 """Settings shared by every environment. Private values come from environment variables (see .env.example)."""
 
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -23,6 +24,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "axes",
     "tracker",
 ]
 
@@ -35,6 +37,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "tracker.middleware.ContentSecurityPolicyMiddleware",
+    "axes.middleware.AxesMiddleware",  # must stay last
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -59,6 +62,18 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # SQLite in development, PostgreSQL in production (DATABASE_URL=postgres://user:password@host:5432/name).
 DATABASES = {"default": env.db("DATABASE_URL", default="sqlite:///db.sqlite3")}
+
+# Login throttling (django-axes): lock an account after too many failed attempts, whatever the IP
+# (behind a reverse proxy the IP is unreliable; the cost is that someone can lock a given account for a while).
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",  # first: refuses locked accounts
+    "django.contrib.auth.backends.ModelBackend",
+]
+AXES_FAILURE_LIMIT = env.int("AXES_FAILURE_LIMIT", default=5)
+AXES_COOLOFF_TIME = timedelta(minutes=env.int("AXES_COOLOFF_MINUTES", default=15))
+AXES_LOCKOUT_PARAMETERS = ["username"]
+AXES_RESET_ON_SUCCESS = True
+AXES_LOCKOUT_TEMPLATE = "registration/lockout.html"
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
