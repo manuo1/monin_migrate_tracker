@@ -1,0 +1,9 @@
+{% extends "tracker/base.html" %}
+{% block title %}Session expirée{% endblock %}
+{% block content %}
+<div class="alert alert-warning">
+  <h1 class="h4">Formulaire expiré</h1>
+  <p class="mb-2">La session ou le formulaire n'est plus valide (page restée ouverte trop longtemps, ou cookies bloqués). Rien n'a été enregistré : rechargez la page puis recommencez.</p>
+  <a href="/" class="btn btn-sm btn-outline-secondary">Retour à l'accueil</a>
+</div>
+{% endblock %}
