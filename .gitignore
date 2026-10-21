@@ -13,6 +13,7 @@ HANDOFF.local.md
 *.sqlite3-journal
 media/
 dumps/
+backups/
 *.dump
 
 # Python
