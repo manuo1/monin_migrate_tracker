@@ -1,14 +1,14 @@
 {% extends "tracker/base.html" %}
-{% load static %}
-{% block title %}Nouveau ticket Aptean{% endblock %}
+{% load static i18n %}
+{% block title %}{% translate "New Aptean ticket" %}{% endblock %}
 {% block content %}
-<a href="{% if source %}{% url 'feedback_detail' source.pk %}{% else %}{% url 'vendor_ticket_list' %}{% endif %}" class="btn btn-sm btn-outline-secondary mb-3">← Retour</a>
-<h1 class="h4 mb-3">Nouveau ticket Aptean</h1>
+<a href="{% if source %}{% url 'feedback_detail' source.pk %}{% else %}{% url 'vendor_ticket_list' %}{% endif %}" class="btn btn-sm btn-outline-secondary mb-3">{% translate "← Back" %}</a>
+<h1 class="h4 mb-3">{% translate "New Aptean ticket" %}</h1>
 
 {% if source %}
+{% url 'feedback_detail' source.pk as source_url %}
 <div class="alert alert-info" style="max-width: 720px">
-  Pré-rempli depuis le ticket Monin <a href="{% url 'feedback_detail' source.pk %}">#{{ source.pk }}</a> : une fois enregistré, le ticket Aptean lui sera lié.
-  Copiez la description dans Jira, puis saisissez ici la référence Jira obtenue (obligatoire). Statut par défaut : En cours.
+  {% blocktranslate with pk=source.pk %}Prefilled from Monin ticket <a href="{{ source_url }}">#{{ pk }}</a>: once saved, the Aptean ticket will be linked to it. Copy the description into Jira, then enter the Jira reference you get here (mandatory). Default status: In progress.{% endblocktranslate %}
 </div>
 {% endif %}
 
@@ -20,9 +20,9 @@
     <div class="d-flex justify-content-between align-items-end mb-1">
       <label class="form-label m-0" for="{{ field.id_for_label }}">{{ field.label }}</label>
       {% if field.name == "title" or field.name == "description" %}
-        <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-target="{{ field.id_for_label }}">Copier</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-target="{{ field.id_for_label }}">{% translate "Copy" %}</button>
       {% elif field.name == "ref" %}
-        <a class="btn btn-sm btn-outline-primary" href="{{ jira_form_url }}" target="_blank" rel="noopener noreferrer">Ouvrir le formulaire Jira ↗</a>
+        <a class="btn btn-sm btn-outline-primary" href="{{ jira_form_url }}" target="_blank" rel="noopener noreferrer">{% translate "Open the Jira form ↗" %}</a>
       {% endif %}
     </div>
     {{ field }}
@@ -30,8 +30,8 @@
   </div>
   {% endfor %}
   <div class="d-flex gap-2">
-    <button class="btn btn-primary">Enregistrer</button>
-    <a class="btn btn-outline-secondary" href="{% if source %}{% url 'feedback_detail' source.pk %}{% else %}{% url 'vendor_ticket_list' %}{% endif %}">Annuler</a>
+    <button class="btn btn-primary">{% translate "Save" %}</button>
+    <a class="btn btn-outline-secondary" href="{% if source %}{% url 'feedback_detail' source.pk %}{% else %}{% url 'vendor_ticket_list' %}{% endif %}">{% translate "Cancel" %}</a>
   </div>
 </form>
 {% endblock %}

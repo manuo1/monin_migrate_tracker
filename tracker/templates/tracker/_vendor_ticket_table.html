@@ -1,21 +1,25 @@
+{% load i18n %}
+{% translate "Reference" as th_ref %}{% translate "Title" as th_title %}{% translate "Description" as th_description %}
+{% translate "Page" as th_page %}{% translate "Tab" as th_tab %}{% translate "Status at Aptean" as th_status %}
+{% translate "Created on" as th_date %}{% translate "Linked Monin tickets" as th_feedbacks %}
 <table class="table table-sm table-hover bg-white align-middle">
   <thead><tr>
     {% if selection %}<th></th>{% endif %}
-    {% include "tracker/_sortable_th.html" with key="ref" title="Référence" %}
-    {% include "tracker/_sortable_th.html" with key="title" title="Titre" %}
-    {% include "tracker/_sortable_th.html" with key="description" title="Description" %}
-    {% include "tracker/_sortable_th.html" with key="page" title="Page" %}
-    {% include "tracker/_sortable_th.html" with key="tab" title="Onglet" %}
-    {% include "tracker/_sortable_th.html" with key="status" title="Statut chez Aptean" %}
-    {% include "tracker/_sortable_th.html" with key="date" title="Créé le" %}
-    {% include "tracker/_sortable_th.html" with key="feedbacks" title="Tickets Monin liés" %}
+    {% include "tracker/_sortable_th.html" with key="ref" title=th_ref %}
+    {% include "tracker/_sortable_th.html" with key="title" title=th_title %}
+    {% include "tracker/_sortable_th.html" with key="description" title=th_description %}
+    {% include "tracker/_sortable_th.html" with key="page" title=th_page %}
+    {% include "tracker/_sortable_th.html" with key="tab" title=th_tab %}
+    {% include "tracker/_sortable_th.html" with key="status" title=th_status %}
+    {% include "tracker/_sortable_th.html" with key="date" title=th_date %}
+    {% include "tracker/_sortable_th.html" with key="feedbacks" title=th_feedbacks %}
     {% if user.is_staff %}<th></th>{% endif %}
   </tr></thead>
   <tbody>
   {% for t in tickets %}
     <tr>
       {% if selection %}
-      <td>{% if t.pk in already %}<span class="badge text-bg-light border">déjà associé</span>{% else %}<input type="checkbox" class="form-check-input assoc-cb" name="tickets" value="{{ t.pk }}">{% endif %}</td>
+      <td>{% if t.pk in already %}<span class="badge text-bg-light border">{% translate "already associated" %}</span>{% else %}<input type="checkbox" class="form-check-input assoc-cb" name="tickets" value="{{ t.pk }}">{% endif %}</td>
       {% endif %}
       <td><a href="{% url 'vendor_ticket_detail' t.pk %}">{{ t.label }}</a></td>
       <td style="min-width: 180px">{{ t.title }}</td>
@@ -28,7 +32,7 @@
       {% if user.is_staff %}<td>{% if t.link %}<a href="{{ t.link }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary">Jira ↗</a>{% endif %}</td>{% endif %}
     </tr>
   {% empty %}
-    <tr><td colspan="{% if selection %}10{% elif user.is_staff %}9{% else %}8{% endif %}" class="text-center text-muted">Aucun ticket Aptean.</td></tr>
+    <tr><td colspan="{% if selection %}10{% elif user.is_staff %}9{% else %}8{% endif %}" class="text-center text-muted">{% translate "No Aptean tickets." %}</td></tr>
   {% endfor %}
   </tbody>
 </table>

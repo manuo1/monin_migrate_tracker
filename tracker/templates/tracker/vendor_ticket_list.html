@@ -1,10 +1,10 @@
 {% extends "tracker/base.html" %}
-{% load static %}
-{% block title %}Tickets Aptean{% endblock %}
+{% load static i18n %}
+{% block title %}{% translate "Aptean tickets" %}{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="display-6 fw-bold m-0">Tickets Aptean</h1>
-  {% if user.is_staff %}<a href="{% url 'vendor_ticket_create' %}" class="btn btn-primary">Nouveau ticket Aptean</a>{% endif %}
+  <h1 class="display-6 fw-bold m-0">{% translate "Aptean tickets" %}</h1>
+  {% if user.is_staff %}<a href="{% url 'vendor_ticket_create' %}" class="btn btn-primary">{% translate "New Aptean ticket" %}</a>{% endif %}
 </div>
 
 {% include "tracker/_vendor_ticket_filters.html" %}

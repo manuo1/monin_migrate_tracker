@@ -414,3 +414,103 @@ msgstr "← Back to ticket"
 
 msgid "The user's description cannot be edited: correct it with a comment. Every change is recorded in the history."
 msgstr "The user's description cannot be edited: correct it with a comment. Every change is recorded in the history."
+
+# Vendor ticket pages
+#, python-format
+msgid "Associate Aptean tickets to ticket #%(pk)s"
+msgstr "Associate Aptean tickets to ticket #%(pk)s"
+
+#, python-format
+msgid "← Back to Monin ticket #%(pk)s"
+msgstr "← Back to Monin ticket #%(pk)s"
+
+msgid "Monin ticket"
+msgstr "Monin ticket"
+
+msgid "Associate the checked tickets"
+msgstr "Associate the checked tickets"
+
+msgid "ticket(s) checked — the selection is kept when you filter or search"
+msgstr "ticket(s) checked — the selection is kept when you filter or search"
+
+msgid "New Aptean ticket"
+msgstr "New Aptean ticket"
+
+msgid "← Back"
+msgstr "← Back"
+
+#, python-format
+msgid "Prefilled from Monin ticket <a href=\"%(source_url)s\">#%(pk)s</a>: once saved, the Aptean ticket will be linked to it. Copy the description into Jira, then enter the Jira reference you get here (mandatory). Default status: In progress."
+msgstr "Prefilled from Monin ticket <a href=\"%(source_url)s\">#%(pk)s</a>: once saved, the Aptean ticket will be linked to it. Copy the description into Jira, then enter the Jira reference you get here (mandatory). Default status: In progress."
+
+msgid "Open the Jira form ↗"
+msgstr "Open the Jira form ↗"
+
+#, python-format
+msgid "Aptean ticket %(label)s"
+msgstr "Aptean ticket %(label)s"
+
+msgid "← Back to the Aptean tickets list"
+msgstr "← Back to the Aptean tickets list"
+
+msgid "page not set"
+msgstr "page not set"
+
+msgid "Aptean ticket"
+msgstr "Aptean ticket"
+
+#, python-format
+msgid ", created on %(date)s"
+msgstr ", created on %(date)s"
+
+msgid "No description."
+msgstr "No description."
+
+msgid "Linked Monin tickets:"
+msgstr "Linked Monin tickets:"
+
+msgid "no linked ticket"
+msgstr "no linked ticket"
+
+#, python-format
+msgid "Edit Aptean ticket %(label)s"
+msgstr "Edit Aptean ticket %(label)s"
+
+msgid "← Back to the Aptean ticket"
+msgstr "← Back to the Aptean ticket"
+
+msgid "When a Jira reference is set, the link is derived from the reference. Every change is recorded in the history."
+msgstr "When a Jira reference is set, the link is derived from the reference. Every change is recorded in the history."
+
+msgid "All Aptean statuses"
+msgstr "All Aptean statuses"
+
+msgid "Linked or not to a Monin ticket"
+msgstr "Linked or not to a Monin ticket"
+
+msgid "Without linked Monin ticket"
+msgstr "Without linked Monin ticket"
+
+msgid "With linked Monin ticket"
+msgstr "With linked Monin ticket"
+
+msgid "Reference, page, text... (3 chars min.)"
+msgstr "Reference, page, text... (3 chars min.)"
+
+msgid "Reference"
+msgstr "Reference"
+
+msgid "Title"
+msgstr "Title"
+
+msgid "Created on"
+msgstr "Created on"
+
+msgid "Linked Monin tickets"
+msgstr "Linked Monin tickets"
+
+msgid "already associated"
+msgstr "already associated"
+
+msgid "No Aptean tickets."
+msgstr "No Aptean tickets."

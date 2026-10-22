@@ -1,10 +1,10 @@
 {% extends "tracker/base.html" %}
-{% load static %}
-{% block title %}Modifier le ticket Aptean {{ ticket.label }}{% endblock %}
+{% load static i18n %}
+{% block title %}{% blocktranslate with label=ticket.label %}Edit Aptean ticket {{ label }}{% endblocktranslate %}{% endblock %}
 {% block content %}
-<a href="{% url 'vendor_ticket_detail' ticket.pk %}" class="btn btn-sm btn-outline-secondary mb-3">← Retour au ticket Aptean</a>
+<a href="{% url 'vendor_ticket_detail' ticket.pk %}" class="btn btn-sm btn-outline-secondary mb-3">{% translate "← Back to the Aptean ticket" %}</a>
 
-<h1 class="h3 mb-3">Modifier le ticket Aptean {{ ticket.label }}</h1>
+<h1 class="h3 mb-3">{% blocktranslate with label=ticket.label %}Edit Aptean ticket {{ label }}{% endblocktranslate %}</h1>
 
 <form method="post" class="card card-body mb-3">
   {% csrf_token %}
@@ -16,10 +16,10 @@
     {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
   </div>
   {% endfor %}
-  <div class="small text-muted mb-3">Quand une référence Jira est renseignée, le lien est déduit de la référence. Chaque changement est tracé dans l'historique.</div>
+  <div class="small text-muted mb-3">{% translate "When a Jira reference is set, the link is derived from the reference. Every change is recorded in the history." %}</div>
   <div class="d-flex gap-2">
-    <button class="btn btn-primary">Enregistrer</button>
-    <a href="{% url 'vendor_ticket_detail' ticket.pk %}" class="btn btn-outline-secondary">Annuler</a>
+    <button class="btn btn-primary">{% translate "Save" %}</button>
+    <a href="{% url 'vendor_ticket_detail' ticket.pk %}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
   </div>
 </form>
 {% endblock %}
