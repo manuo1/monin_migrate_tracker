@@ -1,29 +1,30 @@
 {% extends "tracker/base.html" %}
-{% load static %}
-{% block title %}Ticket #{{ feedback.pk }}{% endblock %}
+{% load static i18n %}
+{% block title %}{% blocktranslate with pk=feedback.pk %}Ticket #{{ pk }}{% endblocktranslate %}{% endblock %}
 {% block content %}
-<a href="{{ back_url }}" class="btn btn-sm btn-outline-secondary mb-3">← Retour à la liste</a>
-<a href="{% url 'feedback_create' %}?copy={{ feedback.pk }}" class="btn btn-sm btn-outline-secondary mb-3 ms-2">Copier ce ticket</a>
-{% if user.is_staff %}<a href="{% url 'feedback_edit' feedback.pk %}" class="btn btn-sm btn-outline-primary mb-3 ms-2">Modifier</a>{% endif %}
-{% if user.is_staff %}<a href="{% url 'vendor_ticket_create' %}?feedback={{ feedback.pk }}" class="btn btn-sm btn-outline-primary mb-3 ms-2">Créer le ticket Aptean</a>{% endif %}
+{% get_current_language as LANGUAGE_CODE %}
+<a href="{{ back_url }}" class="btn btn-sm btn-outline-secondary mb-3">{% translate "← Back to list" %}</a>
+<a href="{% url 'feedback_create' %}?copy={{ feedback.pk }}" class="btn btn-sm btn-outline-secondary mb-3 ms-2">{% translate "Copy this ticket" %}</a>
+{% if user.is_staff %}<a href="{% url 'feedback_edit' feedback.pk %}" class="btn btn-sm btn-outline-primary mb-3 ms-2">{% translate "Edit" %}</a>{% endif %}
+{% if user.is_staff %}<a href="{% url 'vendor_ticket_create' %}?feedback={{ feedback.pk }}" class="btn btn-sm btn-outline-primary mb-3 ms-2">{% translate "Create the Aptean ticket" %}</a>{% endif %}
 
 <div class="d-flex align-items-center gap-3 mb-3">
-  <h1 class="h3 m-0">Ticket #{{ feedback.pk }}</h1>
+  <h1 class="h3 m-0">{% blocktranslate with pk=feedback.pk %}Ticket #{{ pk }}{% endblocktranslate %}</h1>
   <span class="badge text-bg-{{ feedback.status_info.color }} fs-6">{{ feedback.status_info.label }}</span>
   {% if feedback.closure_reason %}<span class="text-muted">{{ feedback.get_closure_reason_display }}</span>{% endif %}
 </div>
 
 {% if retest_open %}
 <div class="card card-body border-success mb-3">
-  <strong>Retest demandé</strong>
-  <div class="small text-muted mb-2">Le correctif est disponible : refaites le test puis indiquez le résultat.</div>
+  <strong>{% translate "Retest requested" %}</strong>
+  <div class="small text-muted mb-2">{% translate "The fix is available: redo the test, then report the result." %}</div>
   <form method="post" action="{% url 'retest' feedback.pk %}">
     {% csrf_token %}
-    <textarea name="comment" rows="3" class="form-control form-control-sm mb-2" spellcheck="true" lang="fr"
-              placeholder="Commentaire (obligatoire pour un Test KO)">{{ retest_comment }}</textarea>
+    <textarea name="comment" rows="3" class="form-control form-control-sm mb-2" spellcheck="true" lang="{{ LANGUAGE_CODE }}"
+              placeholder="{% translate 'Comment (mandatory for a failed test)' %}">{{ retest_comment }}</textarea>
     <div class="d-flex gap-2">
-      <button name="answer" value="ok" class="btn btn-sm btn-success">Test OK</button>
-      <button name="answer" value="ko" class="btn btn-sm btn-danger">Test KO</button>
+      <button name="answer" value="ok" class="btn btn-sm btn-success">{% translate "Test passed" %}</button>
+      <button name="answer" value="ko" class="btn btn-sm btn-danger">{% translate "Test failed" %}</button>
     </div>
   </form>
 </div>
@@ -31,16 +32,16 @@
 
 <div class="card card-body mb-3">
   <dl class="row mb-0">
-    <dt class="col-sm-3">Type</dt><dd class="col-sm-9">{{ feedback.get_type_display }}</dd>
-    <dt class="col-sm-3">Page</dt><dd class="col-sm-9">{{ feedback.page }}</dd>
-    <dt class="col-sm-3">Onglet</dt><dd class="col-sm-9">{{ feedback.tab|default:"—" }}</dd>
-    <dt class="col-sm-3">Article testé</dt><dd class="col-sm-9">{{ feedback.article_id|default:"—" }}</dd>
-    <dt class="col-sm-3">Auteur</dt><dd class="col-sm-9">{{ feedback.author.username }}</dd>
-    <dt class="col-sm-3">Soumis le</dt><dd class="col-sm-9">{{ feedback.created_at|date:"d/m/Y H:i" }}</dd>
-    <dt class="col-sm-3">Tickets Aptean</dt>
+    <dt class="col-sm-3">{% translate "Type" %}</dt><dd class="col-sm-9">{{ feedback.get_type_display }}</dd>
+    <dt class="col-sm-3">{% translate "Page" %}</dt><dd class="col-sm-9">{{ feedback.page }}</dd>
+    <dt class="col-sm-3">{% translate "Tab" %}</dt><dd class="col-sm-9">{{ feedback.tab|default:"—" }}</dd>
+    <dt class="col-sm-3">{% translate "Tested article" %}</dt><dd class="col-sm-9">{{ feedback.article_id|default:"—" }}</dd>
+    <dt class="col-sm-3">{% translate "Author" %}</dt><dd class="col-sm-9">{{ feedback.author.username }}</dd>
+    <dt class="col-sm-3">{% translate "Submitted on" %}</dt><dd class="col-sm-9">{{ feedback.created_at|date:"d/m/Y H:i" }}</dd>
+    <dt class="col-sm-3">{% translate "Aptean tickets" %}</dt>
     <dd class="col-sm-9">
       {% for t in vendor_tickets %}<a href="{% url 'vendor_ticket_detail' t.pk %}" class="badge text-bg-{% if t.status_info %}{{ t.status_info.color }}{% else %}light border{% endif %} text-decoration-none me-1">{{ t.label }}</a>{% empty %}—{% endfor %}
-      {% if user.is_staff %}<a href="{% url 'vendor_ticket_associate' feedback.pk %}" class="btn btn-sm btn-outline-secondary ms-2">Associer des tickets Aptean</a>{% endif %}
+      {% if user.is_staff %}<a href="{% url 'vendor_ticket_associate' feedback.pk %}" class="btn btn-sm btn-outline-secondary ms-2">{% translate "Associate Aptean tickets" %}</a>{% endif %}
     </dd>
   </dl>
 </div>
@@ -48,7 +49,7 @@
 {% if user.is_staff %}
 <form method="post" action="{% url 'feedback_triage' feedback.pk %}" class="card card-body border-primary mb-3">
   {% csrf_token %}
-  <strong class="mb-2">Triage</strong>
+  <strong class="mb-2">{% translate "Triage" %}</strong>
   {{ triage_form.non_field_errors }}
   {% for field in triage_form.hidden_fields %}{{ field }}{% endfor %}
   {% for field in triage_form.visible_fields %}
@@ -58,18 +59,18 @@
     {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
   </div>
   {% endfor %}
-  <button class="btn btn-sm btn-primary align-self-start">Enregistrer</button>
+  <button class="btn btn-sm btn-primary align-self-start">{% translate "Save" %}</button>
 </form>
 {% endif %}
 
 <div class="card mb-3">
-  <div class="card-header">Description</div>
+  <div class="card-header">{% translate "Description" %}</div>
   <div class="card-body" style="white-space: pre-line">{{ feedback.description }}</div>
 </div>
 
 {% if attachments or can_add_attachments %}
 <div class="card mb-3" id="attachment-zone" data-auto="1">
-  <div class="card-header">Pièces jointes</div>
+  <div class="card-header">{% translate "Attachments" %}</div>
   <div class="card-body">
     <div class="d-flex flex-wrap gap-3">
       {% for a in attachments %}
@@ -82,13 +83,13 @@
         {% elif a.kind == 'pdf' %}
           <div class="border rounded bg-light d-flex align-items-center justify-content-center fw-bold text-danger" style="height: 110px; width: 90px">PDF</div>
         {% else %}
-          <div class="border rounded bg-light d-flex align-items-center justify-content-center fw-bold text-secondary" style="height: 110px; width: 90px">FICHIER</div>
+          <div class="border rounded bg-light d-flex align-items-center justify-content-center fw-bold text-secondary" style="height: 110px; width: 90px">{% translate "FILE" %}</div>
         {% endif %}
         <div class="small text-truncate">{{ a.name }}</div>
         <div class="small text-muted">{{ a.created_at|date:"d/m/Y H:i" }}</div>
       </a>
       {% empty %}
-      <p class="text-muted m-0">Aucune pièce jointe.</p>
+      <p class="text-muted m-0">{% translate "No attachments." %}</p>
       {% endfor %}
     </div>
   </div>
@@ -97,9 +98,9 @@
     {% csrf_token %}
     <div class="d-flex gap-2">
       <input type="file" name="files" multiple class="form-control form-control-sm">
-      <button class="btn btn-sm btn-primary">Ajouter</button>
+      <button class="btn btn-sm btn-primary">{% translate "Add" %}</button>
     </div>
-    <div class="small text-muted mt-2">Choisissez, glissez des fichiers sur ce cadre ou collez une capture avec Ctrl+V : l'ajout est immédiat.</div>
+    <div class="small text-muted mt-2">{% translate "Choose files, drag them onto this frame or paste a screenshot with Ctrl+V: files are added immediately." %}</div>
     <div id="attachment-staged" class="small mt-1"></div>
   </form>
   {% endif %}
@@ -107,7 +108,7 @@
 {% endif %}
 
 <div class="card mb-3">
-  <div class="card-header">Historique</div>
+  <div class="card-header">{% translate "History" %}</div>
   <ul class="list-group list-group-flush">
     {% for item in timeline %}
     <li class="list-group-item{% if item.is_comment %} bg-body-tertiary{% endif %}">
@@ -115,7 +116,7 @@
       <div style="white-space: pre-line">{{ item.text }}</div>
     </li>
     {% empty %}
-    <li class="list-group-item text-muted">Aucun événement.</li>
+    <li class="list-group-item text-muted">{% translate "No events." %}</li>
     {% endfor %}
   </ul>
 </div>
@@ -124,20 +125,20 @@
   {% csrf_token %}
   <label for="{{ comment_form.text.id_for_label }}" class="form-label">{{ comment_form.text.label }}</label>
   {{ comment_form.text }}
-  <button class="btn btn-primary mt-2 align-self-start">Commenter</button>
+  <button class="btn btn-primary mt-2 align-self-start">{% translate "Comment" %}</button>
 </form>
 
 {% if attachments %}
 <div id="attachment-viewer" style="display:none; position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,.88)">
-  <button type="button" id="viewer-close" class="btn btn-light position-absolute top-0 end-0 m-3" title="Fermer (Échap)">✕</button>
+  <button type="button" id="viewer-close" class="btn btn-light position-absolute top-0 end-0 m-3" title="{% translate 'Close (Esc)' %}">✕</button>
   {% if user.is_staff %}
   <form id="viewer-delete-form" method="post" class="position-absolute top-0 start-0 m-3">
     {% csrf_token %}
-    <button class="btn btn-danger">Supprimer</button>
+    <button class="btn btn-danger">{% translate "Delete" %}</button>
   </form>
   {% endif %}
-  <button type="button" id="viewer-prev" class="btn btn-light position-absolute top-50 start-0 ms-3 translate-middle-y" title="Précédent (←)">‹</button>
-  <button type="button" id="viewer-next" class="btn btn-light position-absolute top-50 end-0 me-3 translate-middle-y" title="Suivant (→)">›</button>
+  <button type="button" id="viewer-prev" class="btn btn-light position-absolute top-50 start-0 ms-3 translate-middle-y" title="{% translate 'Previous (←)' %}">‹</button>
+  <button type="button" id="viewer-next" class="btn btn-light position-absolute top-50 end-0 me-3 translate-middle-y" title="{% translate 'Next (→)' %}">›</button>
   <div id="viewer-content" class="position-absolute d-flex align-items-center justify-content-center" style="inset: 56px 80px 56px 80px"></div>
   <div id="viewer-caption" class="position-absolute bottom-0 start-0 w-100 text-center text-white small pb-3"></div>
 </div>

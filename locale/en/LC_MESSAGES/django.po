@@ -268,3 +268,149 @@ msgstr "Django administration (outside the application)"
 #: .\tracker\templates\tracker\base.html:32
 msgid "Log out"
 msgstr "Log out"
+
+# Feedback list, detail, create and edit pages
+msgid "New ticket"
+msgstr "New ticket"
+
+msgid "My tickets"
+msgstr "My tickets"
+
+msgid "All authors"
+msgstr "All authors"
+
+msgid "All types"
+msgstr "All types"
+
+msgid "All statuses"
+msgstr "All statuses"
+
+msgid "All pages"
+msgstr "All pages"
+
+msgid "All tabs"
+msgstr "All tabs"
+
+msgid "Page, article, text... (3 chars min.)"
+msgstr "Page, article, text... (3 chars min.)"
+
+msgid "Author"
+msgstr "Author"
+
+msgid "Submitted on"
+msgstr "Submitted on"
+
+msgid "Click to expand / collapse"
+msgstr "Click to expand / collapse"
+
+msgid "No status"
+msgstr "No status"
+
+msgid "No tickets."
+msgstr "No tickets."
+
+msgid "← Back to list"
+msgstr "← Back to list"
+
+msgid "Copy this ticket"
+msgstr "Copy this ticket"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Create the Aptean ticket"
+msgstr "Create the Aptean ticket"
+
+#, python-format
+msgid "Ticket #%(pk)s"
+msgstr "Ticket #%(pk)s"
+
+msgid "Retest requested"
+msgstr "Retest requested"
+
+msgid "The fix is available: redo the test, then report the result."
+msgstr "The fix is available: redo the test, then report the result."
+
+msgid "Comment (mandatory for a failed test)"
+msgstr "Comment (mandatory for a failed test)"
+
+msgid "Associate Aptean tickets"
+msgstr "Associate Aptean tickets"
+
+msgid "Triage"
+msgstr "Triage"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Attachments"
+msgstr "Attachments"
+
+msgid "FILE"
+msgstr "FILE"
+
+msgid "No attachments."
+msgstr "No attachments."
+
+msgid "Add"
+msgstr "Add"
+
+msgid "Choose files, drag them onto this frame or paste a screenshot with Ctrl+V: files are added immediately."
+msgstr "Choose files, drag them onto this frame or paste a screenshot with Ctrl+V: files are added immediately."
+
+msgid "History"
+msgstr "History"
+
+msgid "No events."
+msgstr "No events."
+
+msgid "Comment"
+msgstr "Comment"
+
+msgid "Close (Esc)"
+msgstr "Close (Esc)"
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "Previous (←)"
+msgstr "Previous (←)"
+
+msgid "Next (→)"
+msgstr "Next (→)"
+
+#, python-format
+msgid "See ticket #%(pk)s"
+msgstr "See ticket #%(pk)s"
+
+#, python-format
+msgid "Attachments copied from ticket #%(pk)s"
+msgstr "Attachments copied from ticket #%(pk)s"
+
+msgid "Open"
+msgstr "Open"
+
+msgid "Remove from the copy"
+msgstr "Remove from the copy"
+
+msgid "Drag files onto the form or paste a screenshot with Ctrl+V."
+msgstr "Drag files onto the form or paste a screenshot with Ctrl+V."
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "No tickets yet."
+msgstr "No tickets yet."
+
+msgid "Copy"
+msgstr "Copy"
+
+#, python-format
+msgid "Edit ticket #%(pk)s"
+msgstr "Edit ticket #%(pk)s"
+
+msgid "← Back to ticket"
+msgstr "← Back to ticket"
+
+msgid "The user's description cannot be edited: correct it with a comment. Every change is recorded in the history."
+msgstr "The user's description cannot be edited: correct it with a comment. Every change is recorded in the history."

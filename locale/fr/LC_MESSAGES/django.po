@@ -268,3 +268,149 @@ msgstr "Administration Django (hors application)"
 #: .\tracker\templates\tracker\base.html:32
 msgid "Log out"
 msgstr "Déconnexion"
+
+# Feedback list, detail, create and edit pages
+msgid "New ticket"
+msgstr "Nouveau ticket"
+
+msgid "My tickets"
+msgstr "Mes tickets"
+
+msgid "All authors"
+msgstr "Tous les auteurs"
+
+msgid "All types"
+msgstr "Tous types"
+
+msgid "All statuses"
+msgstr "Tous statuts"
+
+msgid "All pages"
+msgstr "Toutes pages"
+
+msgid "All tabs"
+msgstr "Tous onglets"
+
+msgid "Page, article, text... (3 chars min.)"
+msgstr "Page, article, texte... (3 car. min.)"
+
+msgid "Author"
+msgstr "Auteur"
+
+msgid "Submitted on"
+msgstr "Soumis le"
+
+msgid "Click to expand / collapse"
+msgstr "Cliquer pour déplier / replier"
+
+msgid "No status"
+msgstr "Sans statut"
+
+msgid "No tickets."
+msgstr "Aucun ticket."
+
+msgid "← Back to list"
+msgstr "← Retour à la liste"
+
+msgid "Copy this ticket"
+msgstr "Copier ce ticket"
+
+msgid "Edit"
+msgstr "Modifier"
+
+msgid "Create the Aptean ticket"
+msgstr "Créer le ticket Aptean"
+
+#, python-format
+msgid "Ticket #%(pk)s"
+msgstr "Ticket #%(pk)s"
+
+msgid "Retest requested"
+msgstr "Retest demandé"
+
+msgid "The fix is available: redo the test, then report the result."
+msgstr "Le correctif est disponible : refaites le test puis indiquez le résultat."
+
+msgid "Comment (mandatory for a failed test)"
+msgstr "Commentaire (obligatoire pour un Test KO)"
+
+msgid "Associate Aptean tickets"
+msgstr "Associer des tickets Aptean"
+
+msgid "Triage"
+msgstr "Triage"
+
+msgid "Save"
+msgstr "Enregistrer"
+
+msgid "Attachments"
+msgstr "Pièces jointes"
+
+msgid "FILE"
+msgstr "FICHIER"
+
+msgid "No attachments."
+msgstr "Aucune pièce jointe."
+
+msgid "Add"
+msgstr "Ajouter"
+
+msgid "Choose files, drag them onto this frame or paste a screenshot with Ctrl+V: files are added immediately."
+msgstr "Choisissez, glissez des fichiers sur ce cadre ou collez une capture avec Ctrl+V : l'ajout est immédiat."
+
+msgid "History"
+msgstr "Historique"
+
+msgid "No events."
+msgstr "Aucun événement."
+
+msgid "Comment"
+msgstr "Commenter"
+
+msgid "Close (Esc)"
+msgstr "Fermer (Échap)"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Previous (←)"
+msgstr "Précédent (←)"
+
+msgid "Next (→)"
+msgstr "Suivant (→)"
+
+#, python-format
+msgid "See ticket #%(pk)s"
+msgstr "Voir le ticket #%(pk)s"
+
+#, python-format
+msgid "Attachments copied from ticket #%(pk)s"
+msgstr "Pièces jointes reprises du ticket #%(pk)s"
+
+msgid "Open"
+msgstr "Ouvrir"
+
+msgid "Remove from the copy"
+msgstr "Retirer de la copie"
+
+msgid "Drag files onto the form or paste a screenshot with Ctrl+V."
+msgstr "Glissez des fichiers sur le formulaire ou collez une capture avec Ctrl+V."
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "No tickets yet."
+msgstr "Aucun ticket pour l'instant."
+
+msgid "Copy"
+msgstr "Copier"
+
+#, python-format
+msgid "Edit ticket #%(pk)s"
+msgstr "Modifier le ticket #%(pk)s"
+
+msgid "← Back to ticket"
+msgstr "← Retour au ticket"
+
+msgid "The user's description cannot be edited: correct it with a comment. Every change is recorded in the history."
+msgstr "La description de l'utilisateur n'est pas modifiable : corrigez-la via un commentaire. Chaque changement est tracé dans l'historique."

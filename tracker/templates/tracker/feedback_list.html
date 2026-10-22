@@ -1,13 +1,14 @@
 {% extends "tracker/base.html" %}
-{% load static %}
+{% load static i18n %}
 {% block content %}
+{% translate "No status" as no_status %}
 <style>
   .desc-clamp { white-space: pre-line; cursor: pointer; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
   .desc-clamp.open { display: block; }
 </style>
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="display-6 fw-bold m-0">Tickets Monin</h1>
-  <a href="{% url 'feedback_create' %}" class="btn btn-primary">+ Nouveau ticket</a>
+  <h1 class="display-6 fw-bold m-0">{% translate "Monin tickets" %}</h1>
+  <a href="{% url 'feedback_create' %}" class="btn btn-primary">+ {% translate "New ticket" %}</a>
 </div>
 
 <form method="get" data-list-filters class="row g-2 mb-3">
@@ -15,48 +16,51 @@
   <input type="hidden" name="order" value="{{ order }}">
   <div class="col-auto">
     <select name="author" class="form-select" data-autosubmit>
-      <option value="me" {% if filters.author == 'me' %}selected{% endif %}>Mes tickets</option>
-      <option value="" {% if filters.author == '' %}selected{% endif %}>Tous les auteurs</option>
+      <option value="me" {% if filters.author == 'me' %}selected{% endif %}>{% translate "My tickets" %}</option>
+      <option value="" {% if filters.author == '' %}selected{% endif %}>{% translate "All authors" %}</option>
       {% for u in authors %}<option value="{{ u.pk }}" {% if filters.author == u.pk|stringformat:'s' %}selected{% endif %}>{{ u.username }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-auto">
     <select name="type" class="form-select" data-autosubmit>
-      <option value="">Tous types</option>
+      <option value="">{% translate "All types" %}</option>
       {% for value, label in types %}<option value="{{ value }}" {% if filters.type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-auto">
     <select name="status" class="form-select" data-autosubmit>
-      <option value="">Tous statuts</option>
+      <option value="">{% translate "All statuses" %}</option>
       {% for s in statuses %}<option value="{{ s.code }}" {% if filters.status == s.code %}selected{% endif %}>{{ s.label }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-auto">
     <select name="page" class="form-select" data-autosubmit data-reset-field="tab">
-      <option value="">Toutes pages</option>
+      <option value="">{% translate "All pages" %}</option>
       {% for p in pages %}<option value="{{ p }}" {% if filters.page == p %}selected{% endif %}>{{ p }}</option>{% endfor %}
     </select>
   </div>
   <div class="col-auto">
     <select name="tab" class="form-select" data-autosubmit>
-      <option value="">Tous onglets</option>
+      <option value="">{% translate "All tabs" %}</option>
       {% for t in tabs %}<option value="{{ t }}" {% if filters.tab == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
     </select>
   </div>
-  <div class="col-auto"><input name="q" value="{{ filters.q }}" class="form-control" placeholder="Page, article, texte... (3 car. min.)" autocomplete="off"></div>
+  <div class="col-auto"><input name="q" value="{{ filters.q }}" class="form-control" placeholder="{% translate 'Page, article, text... (3 chars min.)' %}" autocomplete="off"></div>
 </form>
 
 <table class="table table-sm table-hover bg-white align-middle">
   <thead><tr>
+    {% translate "Type" as th_type %}{% translate "Page" as th_page %}{% translate "Tab" as th_tab %}
+    {% translate "Description" as th_description %}{% translate "Author" as th_author %}{% translate "Status" as th_status %}
+    {% translate "Submitted on" as th_date %}
     {% include "tracker/_sortable_th.html" with key="id" title="#" %}
-    {% include "tracker/_sortable_th.html" with key="type" title="Type" %}
-    {% include "tracker/_sortable_th.html" with key="page" title="Page" %}
-    {% include "tracker/_sortable_th.html" with key="tab" title="Onglet" %}
-    {% include "tracker/_sortable_th.html" with key="description" title="Description" %}
-    {% include "tracker/_sortable_th.html" with key="author" title="Auteur" %}
-    {% include "tracker/_sortable_th.html" with key="status" title="Statut" %}
-    {% include "tracker/_sortable_th.html" with key="date" title="Soumis le" %}
+    {% include "tracker/_sortable_th.html" with key="type" title=th_type %}
+    {% include "tracker/_sortable_th.html" with key="page" title=th_page %}
+    {% include "tracker/_sortable_th.html" with key="tab" title=th_tab %}
+    {% include "tracker/_sortable_th.html" with key="description" title=th_description %}
+    {% include "tracker/_sortable_th.html" with key="author" title=th_author %}
+    {% include "tracker/_sortable_th.html" with key="status" title=th_status %}
+    {% include "tracker/_sortable_th.html" with key="date" title=th_date %}
     {% include "tracker/_sortable_th.html" with key="vendor" title="Aptean" %}
   </tr></thead>
   <tbody>
@@ -66,14 +70,14 @@
       <td>{{ f.get_type_display }}</td>
       <td style="min-width: 180px">{{ f.page }}</td>
       <td>{{ f.tab }}</td>
-      <td style="min-width: 200px"><div class="desc-clamp" style="max-width: 320px" title="Cliquer pour déplier / replier">{{ f.description }}</div></td>
+      <td style="min-width: 200px"><div class="desc-clamp" style="max-width: 320px" title="{% translate 'Click to expand / collapse' %}">{{ f.description }}</div></td>
       <td>{{ f.author.username }}</td>
       <td><span class="badge text-bg-{{ f.status_info.color }}">{{ f.status_info.label }}</span></td>
       <td>{{ f.created_at|date:"d/m/Y" }}</td>
-      <td>{% for t in f.vendor_tickets.all %}<span class="badge text-bg-{% if t.status_info %}{{ t.status_info.color }}{% else %}light border{% endif %} me-1" title="{{ t.status_info.label|default:'Sans statut' }}">{{ t.label }}</span>{% endfor %}</td>
+      <td>{% for t in f.vendor_tickets.all %}<span class="badge text-bg-{% if t.status_info %}{{ t.status_info.color }}{% else %}light border{% endif %} me-1" title="{{ t.status_info.label|default:no_status }}">{{ t.label }}</span>{% endfor %}</td>
     </tr>
   {% empty %}
-    <tr><td colspan="9" class="text-center text-muted">Aucun ticket.</td></tr>
+    <tr><td colspan="9" class="text-center text-muted">{% translate "No tickets." %}</td></tr>
   {% endfor %}
   </tbody>
 </table>
