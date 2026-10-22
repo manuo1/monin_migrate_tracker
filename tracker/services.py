@@ -8,6 +8,7 @@ import hashlib
 
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.utils.translation import gettext as _
 
 from . import history, rules
 from .models import Comment, Feedback, VendorTicket
@@ -109,11 +110,11 @@ def answer_retest(feedback, author, answer, comment=""):
     Returns the new status code.
     """
     if not rules.retest_is_open(feedback, author):
-        raise PermissionDenied("Ce ticket n'est pas en attente de retest pour vous.")
+        raise PermissionDenied(_("This ticket is not awaiting a retest from you."))
     status, closure_reason = rules.retest_outcome(answer)
     comment = (comment or "").strip()
     if rules.comment_required(answer) and not comment:
-        raise ValueError("Un commentaire est obligatoire pour un Test KO : expliquez ce qui ne va pas.")
+        raise ValueError(_("A comment is mandatory for a failed test: explain what is wrong."))
     change_status(feedback, status, author, closure_reason=closure_reason, explanation=comment)
     return status
 

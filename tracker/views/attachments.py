@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from .. import services
@@ -34,7 +35,7 @@ def attachment_file(request, pk):
     try:
         stream = attachment.file.open("rb")
     except FileNotFoundError:
-        raise Http404("Fichier introuvable.") from None
+        raise Http404(_("File not found.")) from None
     return FileResponse(
         stream,
         content_type=content_type,
@@ -53,9 +54,9 @@ def add_attachments(request, pk):
     files = request.FILES.getlist("files")
     if files:
         services.add_attachments(feedback, files, request.user)
-        messages.success(request, f"{len(files)} pièce(s) jointe(s) ajoutée(s).")
+        messages.success(request, _("%(count)s attachment(s) added.") % {"count": len(files)})
     else:
-        messages.error(request, "Aucun fichier sélectionné.")
+        messages.error(request, _("No file selected."))
     return redirect("feedback_detail", pk=pk)
 
 
@@ -66,5 +67,5 @@ def remove_attachment(request, pk, attachment_id):
     feedback = get_object_or_404(Feedback, pk=pk)
     attachment = get_object_or_404(feedback.attachments, pk=attachment_id)
     services.remove_attachment(feedback, attachment, request.user)
-    messages.success(request, "Pièce jointe supprimée.")
+    messages.success(request, _("Attachment removed."))
     return redirect("feedback_detail", pk=pk)

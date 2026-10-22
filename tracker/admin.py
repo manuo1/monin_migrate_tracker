@@ -9,6 +9,7 @@ from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.urls import path
 from django.utils.html import format_html
+from django.utils.translation import gettext, gettext_lazy
 
 from .models import (
     Attachment,
@@ -40,11 +41,11 @@ def out_of_reference(queryset):
 
 
 class OutOfReferenceFilter(admin.SimpleListFilter):
-    title = "référentiel"
+    title = gettext_lazy("reference list")
     parameter_name = "ref"
 
     def lookups(self, request, model_admin):
-        return [("hors", "Page ou onglet hors référentiel")]
+        return [("hors", gettext_lazy("Page or tab outside the reference list"))]
 
     def queryset(self, request, queryset):
         return out_of_reference(queryset) if self.value() == "hors" else queryset
@@ -58,20 +59,21 @@ class ReferenceMixin:
     def _mark(self, value, known):
         if value and value not in known:
             return format_html(
-                '<span style="background:#fff3cd;padding:1px 4px;border-radius:3px" title="Hors référentiel">{}</span>',
+                '<span style="background:#fff3cd;padding:1px 4px;border-radius:3px" title="{}">{}</span>',
+                gettext("Outside the reference list"),
                 value,
             )
         return value
 
-    @admin.display(description="page", ordering="page")
+    @admin.display(description=gettext_lazy("page"), ordering="page")
     def page_ref(self, obj):
         return self._mark(obj.page, set(Page.objects.values_list("name", flat=True)))
 
-    @admin.display(description="onglet", ordering="tab")
+    @admin.display(description=gettext_lazy("tab"), ordering="tab")
     def tab_ref(self, obj):
         return self._mark(obj.tab, set(Tab.objects.values_list("name", flat=True)))
 
-    @admin.action(description="Ajouter les pages/onglets sélectionnés au référentiel")
+    @admin.action(description=gettext_lazy("Add the selected pages/tabs to the reference list"))
     def add_to_reference(self, request, queryset):
         added_pages = added_tabs = 0
         for name in {p.strip() for p in queryset.values_list("page", flat=True) if p.strip()}:
@@ -79,7 +81,10 @@ class ReferenceMixin:
         for name in {t.strip() for t in queryset.values_list("tab", flat=True) if t.strip()}:
             added_tabs += Tab.objects.get_or_create(name=name)[1]
         self.message_user(
-            request, f"Référentiel : {added_pages} page(s) et {added_tabs} onglet(s) ajouté(s).", messages.SUCCESS
+            request,
+            gettext("Reference list: %(pages)s page(s) and %(tabs)s tab(s) added.")
+            % {"pages": added_pages, "tabs": added_tabs},
+            messages.SUCCESS,
         )
 
 
@@ -102,7 +107,7 @@ class FeedbackAdmin(ReferenceMixin, admin.ModelAdmin):
 
 
 class CsvImportForm(forms.Form):
-    file = forms.FileField(label="Fichier CSV (une valeur par ligne, première colonne)")
+    file = forms.FileField(label=gettext_lazy("CSV file (one value per line, first column)"))
 
 
 class CsvFormatError(ValueError):
@@ -111,7 +116,7 @@ class CsvFormatError(ValueError):
 
 def decode_csv(raw):
     if raw.startswith(b"PK\x03\x04"):
-        raise CsvFormatError("Ce fichier est un classeur Excel (.xlsx) : exportez-le en CSV, puis réimportez-le.")
+        raise CsvFormatError(gettext("This file is an Excel workbook (.xlsx): export it as CSV, then import it again."))
     # utf-8 (BOM allowed), cp1252 (Excel on Windows), utf-16 (Excel "Unicode text", recognised by its BOM)
     bom_utf16 = raw.startswith((codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE))
     for encoding in ["utf-16"] if bom_utf16 else ["utf-8-sig", "cp1252"]:
@@ -119,7 +124,7 @@ def decode_csv(raw):
             return raw.decode(encoding)
         except UnicodeDecodeError:
             continue
-    raise CsvFormatError("Encodage non reconnu : enregistrez le fichier en CSV UTF-8, puis réimportez-le.")
+    raise CsvFormatError(gettext("Unrecognised encoding: save the file as UTF-8 CSV, then import it again."))
 
 
 def read_csv_names(raw):
@@ -152,18 +157,22 @@ class ReferenceAdmin(admin.ModelAdmin):
             else:
                 valid = [n for n in names if len(n) <= NAME_MAX_LENGTH]
                 added = sum(self.model.objects.get_or_create(name=n)[1] for n in valid)
-                message = f"{added} valeur(s) ajoutée(s) ({len(valid) - added} déjà présente(s))."
+                message = gettext("%(added)s value(s) added (%(existing)s already present).") % {
+                    "added": added,
+                    "existing": len(valid) - added,
+                }
                 if len(valid) < len(names):
-                    message += (
-                        f" {len(names) - len(valid)} valeur(s) ignorée(s) : plus de {NAME_MAX_LENGTH} caractères."
-                    )
+                    message += " " + gettext("%(count)s value(s) ignored: more than %(max)s characters.") % {
+                        "count": len(names) - len(valid),
+                        "max": NAME_MAX_LENGTH,
+                    }
                 self.message_user(request, message, messages.SUCCESS)
                 return redirect("..")
         context = {
             **self.admin_site.each_context(request),
             "form": form,
             "opts": self.model._meta,
-            "title": f"Importer des {self.model._meta.verbose_name_plural}",
+            "title": gettext("Import %(name)s") % {"name": self.model._meta.verbose_name_plural},
         }
         return render(request, "admin/tracker/reference_import.html", context)
 

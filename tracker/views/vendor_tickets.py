@@ -5,6 +5,7 @@ from django.db.models import Case, Count, F, IntegerField, Q, Value, When
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from .. import services
 from ..forms import VendorTicketForm
@@ -122,13 +123,17 @@ def vendor_ticket_associate(request, pk):
         ids = [i for i in request.POST.getlist("tickets") if i.isdigit()]
         tickets = list(VendorTicket.objects.filter(pk__in=ids).exclude(pk__in=already))
         if not tickets:
-            messages.error(request, "Aucun ticket Aptean coché.")
+            messages.error(request, _("No Aptean ticket checked."))
             return redirect(request.get_full_path())
         status_before = feedback.status
         services.associate_vendor_tickets(feedback, tickets, request.user)
-        message = f"{len(tickets)} ticket(s) Aptean associé(s) au ticket Monin #{feedback.pk}."
+        message = _("%(count)s Aptean ticket(s) associated with Monin ticket #%(pk)s.") % {
+            "count": len(tickets),
+            "pk": feedback.pk,
+        }
         if feedback.status != status_before:  # rule T1 moved the status when a vendor ticket was linked
-            message += f" Le ticket Monin passe en « {FEEDBACK_STATUS_BY_CODE[feedback.status].label} »."
+            label = FEEDBACK_STATUS_BY_CODE[feedback.status].label
+            message += " " + _("The Monin ticket moves to “%(status)s”.") % {"status": label}
         messages.success(request, message)
         return redirect("feedback_detail", pk=pk)
     return render(
@@ -160,11 +165,12 @@ def vendor_ticket_create(request):
     if request.method == "POST" and form.is_valid():
         status_before = source.status if source else None
         ticket = services.create_vendor_ticket(author=request.user, source=source, **form.cleaned_data)
-        message = "Ticket Aptean créé."
+        message = _("Aptean ticket created.")
         if source:
-            message = f"Ticket Aptean créé et lié au ticket Monin #{source.pk}."
+            message = _("Aptean ticket created and linked to Monin ticket #%(pk)s.") % {"pk": source.pk}
             if source.status != status_before:  # rule T1 moved the status when the vendor ticket was linked
-                message += f" Le ticket Monin passe en « {FEEDBACK_STATUS_BY_CODE[source.status].label} »."
+                label = FEEDBACK_STATUS_BY_CODE[source.status].label
+                message += " " + _("The Monin ticket moves to “%(status)s”.") % {"status": label}
         messages.success(request, message)
         return redirect("vendor_ticket_detail", pk=ticket.pk)
     return render(
@@ -184,9 +190,9 @@ def vendor_ticket_edit(request, pk):
         if form.is_valid():
             changes = services.save_vendor_ticket(before, form.instance, request.user)
             if changes:
-                messages.success(request, f"Ticket Aptean modifié ({changes} changement(s)).")
+                messages.success(request, _("Aptean ticket modified (%(changes)s change(s)).") % {"changes": changes})
             else:
-                messages.info(request, "Aucune modification.")
+                messages.info(request, _("No changes."))
             return redirect("vendor_ticket_detail", pk=pk)
     else:
         form = VendorTicketForm(instance=ticket)

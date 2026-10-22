@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Case, IntegerField, Min, Q, Value, When
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from .. import rules, services
@@ -127,7 +128,7 @@ def feedback_create(request):
                 copied_attachment_ids=kept_ids if source else (),
                 **data,
             )
-            messages.success(request, f"Ticket #{feedback.pk} créé.")
+            messages.success(request, _("Ticket #%(pk)s created.") % {"pk": feedback.pk})
             return redirect("feedback_detail", pk=feedback.pk)
     else:
         feedback_type = request.GET.get("type", "")
@@ -142,8 +143,11 @@ def feedback_create(request):
             )
             messages.info(
                 request,
-                f"Copie du ticket #{source.pk} : champs, description et pièces jointes repris "
-                "(commentaires et historique non copiés).",
+                _(
+                    "Copy of ticket #%(pk)s: fields, description and attachments copied "
+                    "(comments and history not copied)."
+                )
+                % {"pk": source.pk},
             )
         form = FeedbackForm(initial=initial)
 
@@ -173,9 +177,11 @@ def feedback_edit(request, pk):
         if form.is_valid():
             changes = services.save_changes(before, form.instance, request.user)
             if changes:
-                messages.success(request, f"Ticket #{pk} modifié ({changes} changement(s)).")
+                messages.success(
+                    request, _("Ticket #%(pk)s modified (%(changes)s change(s)).") % {"pk": pk, "changes": changes}
+                )
             else:
-                messages.info(request, "Aucune modification.")
+                messages.info(request, _("No changes."))
             return redirect("feedback_detail", pk=pk)
     else:
         form = FeedbackStaffForm(instance=feedback)
@@ -234,7 +240,7 @@ def retest(request, pk):
     except ValueError as error:
         messages.error(request, str(error))
         return _render_detail(request, feedback, retest_comment=comment)
-    messages.success(request, f"Retest enregistré : {FEEDBACK_STATUS_BY_CODE[status].label}.")
+    messages.success(request, _("Retest saved: %(status)s.") % {"status": FEEDBACK_STATUS_BY_CODE[status].label})
     return redirect("feedback_detail", pk=pk)
 
 
@@ -245,7 +251,7 @@ def feedback_triage(request, pk):
     feedback = get_object_or_404(Feedback.objects.select_related("author"), pk=pk)
     form = TriageForm(request.POST)
     if not form.is_valid():
-        messages.error(request, "Triage invalide : vérifiez les champs.")
+        messages.error(request, _("Invalid triage: check the fields."))
         return _render_detail(request, feedback, triage_form=form)
     data = form.cleaned_data
     try:
@@ -262,14 +268,17 @@ def feedback_triage(request, pk):
         feedback.refresh_from_db()
         messages.error(
             request,
-            "Ce ticket a été modifié entre-temps : rien n'a été enregistré. "
-            "Vérifiez l'état actuel puis recommencez (votre explication est conservée).",
+            _(
+                "This ticket was modified in the meantime: nothing was saved. "
+                "Check the current state then try again (your explanation is kept)."
+            ),
         )
         triage_form = _triage_form(feedback, explanation=data["explanation"])
         return _render_detail(request, feedback, triage_form=triage_form, status=409)
-    message = "Ticket mis à jour."
+    message = _("Ticket updated.")
     if feedback.status != data["status"]:  # rule T1 moved the status after the vendor link was added
-        message += f" Le ticket passe en « {FEEDBACK_STATUS_BY_CODE[feedback.status].label} »."
+        label = FEEDBACK_STATUS_BY_CODE[feedback.status].label
+        message += " " + _("The ticket moves to “%(status)s”.") % {"status": label}
     messages.success(request, message)
     return redirect("feedback_detail", pk=pk)
 
@@ -283,5 +292,5 @@ def add_comment(request, pk):
     if form.is_valid():
         services.add_comment(feedback, request.user, form.cleaned_data["text"])
     else:
-        messages.error(request, "Le commentaire est vide.")
+        messages.error(request, _("The comment is empty."))
     return redirect("feedback_detail", pk=pk)

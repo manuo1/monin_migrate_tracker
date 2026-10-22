@@ -514,3 +514,133 @@ msgstr "already associated"
 
 msgid "No Aptean tickets."
 msgstr "No Aptean tickets."
+
+# View and service messages
+msgid "File not found."
+msgstr "File not found."
+
+#, python-format
+msgid "%(count)s attachment(s) added."
+msgstr "%(count)s attachment(s) added."
+
+msgid "No file selected."
+msgstr "No file selected."
+
+msgid "Attachment removed."
+msgstr "Attachment removed."
+
+#, python-format
+msgid "Ticket #%(pk)s created."
+msgstr "Ticket #%(pk)s created."
+
+#, python-format
+msgid "Copy of ticket #%(pk)s: fields, description and attachments copied (comments and history not copied)."
+msgstr "Copy of ticket #%(pk)s: fields, description and attachments copied (comments and history not copied)."
+
+#, python-format
+msgid "Ticket #%(pk)s modified (%(changes)s change(s))."
+msgstr "Ticket #%(pk)s modified (%(changes)s change(s))."
+
+msgid "No changes."
+msgstr "No changes."
+
+#, python-format
+msgid "Retest saved: %(status)s."
+msgstr "Retest saved: %(status)s."
+
+msgid "Invalid triage: check the fields."
+msgstr "Invalid triage: check the fields."
+
+msgid "This ticket was modified in the meantime: nothing was saved. Check the current state then try again (your explanation is kept)."
+msgstr "This ticket was modified in the meantime: nothing was saved. Check the current state then try again (your explanation is kept)."
+
+msgid "Ticket updated."
+msgstr "Ticket updated."
+
+#, python-format
+msgid "The ticket moves to “%(status)s”."
+msgstr "The ticket moves to “%(status)s”."
+
+msgid "The comment is empty."
+msgstr "The comment is empty."
+
+msgid "No Aptean ticket checked."
+msgstr "No Aptean ticket checked."
+
+#, python-format
+msgid "%(count)s Aptean ticket(s) associated with Monin ticket #%(pk)s."
+msgstr "%(count)s Aptean ticket(s) associated with Monin ticket #%(pk)s."
+
+#, python-format
+msgid "The Monin ticket moves to “%(status)s”."
+msgstr "The Monin ticket moves to “%(status)s”."
+
+msgid "Aptean ticket created."
+msgstr "Aptean ticket created."
+
+#, python-format
+msgid "Aptean ticket created and linked to Monin ticket #%(pk)s."
+msgstr "Aptean ticket created and linked to Monin ticket #%(pk)s."
+
+#, python-format
+msgid "Aptean ticket modified (%(changes)s change(s))."
+msgstr "Aptean ticket modified (%(changes)s change(s))."
+
+msgid "This ticket is not awaiting a retest from you."
+msgstr "This ticket is not awaiting a retest from you."
+
+msgid "A comment is mandatory for a failed test: explain what is wrong."
+msgstr "A comment is mandatory for a failed test: explain what is wrong."
+
+# Admin
+msgid "reference list"
+msgstr "reference list"
+
+msgid "Page or tab outside the reference list"
+msgstr "Page or tab outside the reference list"
+
+msgid "Outside the reference list"
+msgstr "Outside the reference list"
+
+msgid "page"
+msgstr "page"
+
+msgid "tab"
+msgstr "tab"
+
+msgid "Add the selected pages/tabs to the reference list"
+msgstr "Add the selected pages/tabs to the reference list"
+
+#, python-format
+msgid "Reference list: %(pages)s page(s) and %(tabs)s tab(s) added."
+msgstr "Reference list: %(pages)s page(s) and %(tabs)s tab(s) added."
+
+msgid "CSV file (one value per line, first column)"
+msgstr "CSV file (one value per line, first column)"
+
+msgid "This file is an Excel workbook (.xlsx): export it as CSV, then import it again."
+msgstr "This file is an Excel workbook (.xlsx): export it as CSV, then import it again."
+
+msgid "Unrecognised encoding: save the file as UTF-8 CSV, then import it again."
+msgstr "Unrecognised encoding: save the file as UTF-8 CSV, then import it again."
+
+#, python-format
+msgid "%(added)s value(s) added (%(existing)s already present)."
+msgstr "%(added)s value(s) added (%(existing)s already present)."
+
+#, python-format
+msgid "%(count)s value(s) ignored: more than %(max)s characters."
+msgstr "%(count)s value(s) ignored: more than %(max)s characters."
+
+#, python-format
+msgid "Import %(name)s"
+msgstr "Import %(name)s"
+
+msgid "Import a CSV"
+msgstr "Import a CSV"
+
+msgid "One value per line (first column). Duplicates and values already present are ignored."
+msgstr "One value per line (first column). Duplicates and values already present are ignored."
+
+msgid "Import"
+msgstr "Import"
