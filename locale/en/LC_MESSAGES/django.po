@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: monin_migrate_tracker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 18:25+0200\n"
+"POT-Creation-Date: 2026-10-22 18:40+0200\n"
 "PO-Revision-Date: 2026-10-22 18:30+0200\n"
 "Last-Translator: Emmanuel Oudot\n"
 "Language-Team: English\n"
@@ -18,56 +18,253 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: .\tracker\choices.py:11
 msgid "Bug"
 msgstr "Bug"
 
+#: .\tracker\choices.py:12 .\tracker\statuses.py:62
 msgid "Test passed"
 msgstr "Test passed"
 
+#: .\tracker\choices.py:13
 msgid "Suggestion"
 msgstr "Suggestion"
 
+#: .\tracker\choices.py:17
 msgid "Fixed"
 msgstr "Fixed"
 
+#: .\tracker\choices.py:18
 msgid "Not reproduced (user agreed)"
 msgstr "Not reproduced (user agreed)"
 
+#: .\tracker\choices.py:19
 msgid "Product evolution (not a bug)"
 msgstr "Product evolution (not a bug)"
 
+#: .\tracker\choices.py:20
 msgid "Rejected"
 msgstr "Rejected"
 
+# Forms
+#: .\tracker\forms.py:21
+msgid "Add a comment"
+msgstr "Add a comment"
+
+#: .\tracker\forms.py:50
+msgid "Screenshots / videos / documents"
+msgstr "Screenshots / videos / documents"
+
+#: .\tracker\forms.py:56 .\tracker\forms.py:103
+msgid "Type"
+msgstr "Type"
+
+#: .\tracker\forms.py:57 .\tracker\forms.py:103 .\tracker\forms.py:163
+msgid "Page"
+msgstr "Page"
+
+#: .\tracker\forms.py:58 .\tracker\forms.py:103 .\tracker\forms.py:164
+msgid "Tab"
+msgstr "Tab"
+
+#: .\tracker\forms.py:59
+msgid "Article ID"
+msgstr "Article ID"
+
+#: .\tracker\forms.py:60 .\tracker\forms.py:162
+msgid "Description"
+msgstr "Description"
+
+#: .\tracker\forms.py:89
+#, python-format
+msgid ""
+"An identical ticket (same page, tab and description) already exists: "
+"#%(pk)s. Change one of these three fields to create a new ticket."
+msgstr ""
+"An identical ticket (same page, tab and description) already exists: "
+"#%(pk)s. Change one of these three fields to create a new ticket."
+
+#: .\tracker\forms.py:103
+msgid "Tested article"
+msgstr "Tested article"
+
+#: .\tracker\forms.py:121
+msgid "Status"
+msgstr "Status"
+
+#: .\tracker\forms.py:127 .\tracker\templates\tracker\base.html:18
+msgid "Aptean tickets"
+msgstr "Aptean tickets"
+
+#: .\tracker\forms.py:133
+msgid "Closure reason"
+msgstr "Closure reason"
+
+#: .\tracker\forms.py:138
+msgid "Explanation (posted as a comment)"
+msgstr "Explanation (posted as a comment)"
+
+#: .\tracker\forms.py:153 .\tracker\forms.py:166
+msgid "Link"
+msgstr "Link"
+
+#: .\tracker\forms.py:160
+msgid "Jira reference (to enter once the ticket is created in Jira)"
+msgstr "Jira reference (to enter once the ticket is created in Jira)"
+
+#: .\tracker\forms.py:161
+msgid "Problem title"
+msgstr "Problem title"
+
+#: .\tracker\forms.py:165
+msgid "Status at Aptean"
+msgstr "Status at Aptean"
+
+#: .\tracker\forms.py:167
+msgid "Creation date at Aptean"
+msgstr "Creation date at Aptean"
+
+#: .\tracker\forms.py:192
+msgid "Jira reference"
+msgstr "Jira reference"
+
+#: .\tracker\forms.py:200
+#, python-format
+msgid "Enter the ticket number after “%(prefix)s”."
+msgstr "Enter the ticket number after “%(prefix)s”."
+
+#: .\tracker\statuses.py:55
 msgid "New"
 msgstr "New"
 
+#: .\tracker\statuses.py:56
 msgid "In analysis"
 msgstr "In analysis"
 
+#: .\tracker\statuses.py:57
 msgid "To replay with the user"
 msgstr "To replay with the user"
 
+#: .\tracker\statuses.py:58
 msgid "Sent to Aptean"
 msgstr "Sent to Aptean"
 
+#: .\tracker\statuses.py:59
 msgid "To retest (staff)"
 msgstr "To retest (staff)"
 
+#: .\tracker\statuses.py:60
 msgid "To retest (user)"
 msgstr "To retest (user)"
 
+#: .\tracker\statuses.py:61
 msgid "Test failed"
 msgstr "Test failed"
 
+#: .\tracker\statuses.py:63 .\tracker\statuses.py:75
 msgid "Closed"
 msgstr "Closed"
 
+#: .\tracker\statuses.py:73
 msgid "In progress"
 msgstr "In progress"
 
+#: .\tracker\statuses.py:74
 msgid "To test"
 msgstr "To test"
 
+#: .\tracker\statuses.py:76
 msgid "Blocked"
 msgstr "Blocked"
+
+#: .\tracker\templates\403.html:3 .\tracker\templates\403.html:6
+msgid "Access denied"
+msgstr "Access denied"
+
+#: .\tracker\templates\403.html:7
+msgid "You do not have the required permissions for this action."
+msgstr "You do not have the required permissions for this action."
+
+#: .\tracker\templates\403.html:8 .\tracker\templates\403_csrf.html:8
+#: .\tracker\templates\404.html:8 .\tracker\templates\500.html:14
+msgid "Back to home"
+msgstr "Back to home"
+
+#: .\tracker\templates\403_csrf.html:3
+msgid "Session expired"
+msgstr "Session expired"
+
+#: .\tracker\templates\403_csrf.html:6
+msgid "Form expired"
+msgstr "Form expired"
+
+#: .\tracker\templates\403_csrf.html:7
+msgid ""
+"The session or the form is no longer valid (page left open too long, or "
+"cookies blocked). Nothing was saved: reload the page and try again."
+msgstr ""
+"The session or the form is no longer valid (page left open too long, or "
+"cookies blocked). Nothing was saved: reload the page and try again."
+
+#: .\tracker\templates\404.html:3 .\tracker\templates\404.html:6
+msgid "Page not found"
+msgstr "Page not found"
+
+#: .\tracker\templates\404.html:7
+msgid "This page does not exist or has been moved."
+msgstr "This page does not exist or has been moved."
+
+#: .\tracker\templates\500.html:7 .\tracker\templates\500.html:11
+msgid "Internal error"
+msgstr "Internal error"
+
+#: .\tracker\templates\500.html:12
+msgid ""
+"An unexpected error occurred. Data already saved is not affected: try again "
+"in a moment."
+msgstr ""
+"An unexpected error occurred. Data already saved is not affected: try again "
+"in a moment."
+
+#: .\tracker\templates\500.html:13
+msgid "If the problem persists, tell the administrator what you were doing."
+msgstr "If the problem persists, tell the administrator what you were doing."
+
+#: .\tracker\templates\registration\lockout.html:3
+msgid "Account locked"
+msgstr "Account locked"
+
+#: .\tracker\templates\registration\lockout.html:8
+msgid "Account temporarily locked"
+msgstr "Account temporarily locked"
+
+#: .\tracker\templates\registration\lockout.html:9
+msgid "Too many failed login attempts. Try again in a few minutes."
+msgstr "Too many failed login attempts. Try again in a few minutes."
+
+#: .\tracker\templates\registration\login.html:3
+#: .\tracker\templates\registration\login.html:7
+msgid "Login"
+msgstr "Login"
+
+#: .\tracker\templates\registration\login.html:12
+msgid "Sign in"
+msgstr "Sign in"
+
+# Base layout, login, error pages
+#: .\tracker\templates\tracker\base.html:8
+#: .\tracker\templates\tracker\base.html:14
+msgid "Migration tracker"
+msgstr "Migration tracker"
+
+#: .\tracker\templates\tracker\base.html:17
+msgid "Monin tickets"
+msgstr "Monin tickets"
+
+#: .\tracker\templates\tracker\base.html:30
+msgid "Django administration (outside the application)"
+msgstr "Django administration (outside the application)"
+
+#: .\tracker\templates\tracker\base.html:32
+msgid "Log out"
+msgstr "Log out"

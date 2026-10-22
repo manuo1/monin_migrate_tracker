@@ -1,5 +1,6 @@
 from django import forms
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 from .choices import ClosureReason, FeedbackType
 from .models import Comment, Feedback, VendorTicket
@@ -17,7 +18,7 @@ class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ["text"]
-        labels = {"text": "Ajouter un commentaire"}
+        labels = {"text": _("Add a comment")}
         widgets = {"text": forms.Textarea(attrs={"rows": 3, "class": "form-control", **SPELLCHECK})}
 
 
@@ -46,17 +47,17 @@ def _normalize(text):
 class FeedbackForm(forms.ModelForm):
     """Creation of a feedback. A feedback with the same page, tab and description is refused."""
 
-    files = MultipleFileField(required=False, label="Captures / vidéos / documents")
+    files = MultipleFileField(required=False, label=_("Screenshots / videos / documents"))
 
     class Meta:
         model = Feedback
         fields = ["type", "page", "tab", "article_id", "description"]
         labels = {
-            "type": "Type",
-            "page": "Page",
-            "tab": "Onglet",
-            "article_id": "ID de l'article",
-            "description": "Description",
+            "type": _("Type"),
+            "page": _("Page"),
+            "tab": _("Tab"),
+            "article_id": _("Article ID"),
+            "description": _("Description"),
         }
         widgets = {
             "type": forms.Select(attrs={"class": "form-select"}),
@@ -84,8 +85,11 @@ class FeedbackForm(forms.ModelForm):
                 if _normalize(feedback.description) == _normalize(description):
                     self.duplicate = feedback
                     raise forms.ValidationError(
-                        f"Un ticket identique (même page, onglet et description) existe déjà : #{feedback.pk}. "
-                        "Modifiez l'un de ces trois champs pour créer un nouveau ticket."
+                        _(
+                            "An identical ticket (same page, tab and description) already exists: #%(pk)s. "
+                            "Change one of these three fields to create a new ticket."
+                        ),
+                        params={"pk": feedback.pk},
                     )
         return cleaned
 
@@ -96,7 +100,7 @@ class FeedbackStaffForm(forms.ModelForm):
     class Meta:
         model = Feedback
         fields = ["type", "page", "tab", "article_id"]
-        labels = {"type": "Type", "page": "Page", "tab": "Onglet", "article_id": "Article testé"}
+        labels = {"type": _("Type"), "page": _("Page"), "tab": _("Tab"), "article_id": _("Tested article")}
         widgets = {
             "type": forms.Select(attrs={"class": "form-select form-select-sm"}),
             "page": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", "list": PAGES_LIST, **SPELLCHECK}),
@@ -114,24 +118,24 @@ class TriageForm(forms.Form):
 
     status = forms.ChoiceField(
         choices=FEEDBACK_STATUS_CHOICES,
-        label="Statut",
+        label=_("Status"),
         widget=forms.Select(attrs={"class": "form-select form-select-sm"}),
     )
     vendor_tickets = forms.ModelMultipleChoiceField(
         queryset=VendorTicket.objects.all(),
         required=False,
-        label="Tickets Aptean",
+        label=_("Aptean tickets"),
         widget=forms.SelectMultiple(attrs={"class": "form-select form-select-sm", "size": 5}),
     )
     closure_reason = forms.ChoiceField(
         choices=[("", "---")] + ClosureReason.choices,
         required=False,
-        label="Motif de clôture",
+        label=_("Closure reason"),
         widget=forms.Select(attrs={"class": "form-select form-select-sm"}),
     )
     explanation = forms.CharField(
         required=False,
-        label="Explication (publiée en commentaire)",
+        label=_("Explanation (posted as a comment)"),
         widget=forms.Textarea(attrs={"class": SMALL, "rows": 3, **SPELLCHECK}),
     )
     # Optimistic locking: fingerprint of the feedback when the form was displayed (see services.triage_state).
@@ -146,21 +150,21 @@ class VendorTicketForm(forms.ModelForm):
 
     # Explicit scheme assumption (the Django 6.0 default), which also silences the Django 5.x deprecation warning.
     url = forms.URLField(
-        required=False, assume_scheme="https", label="Lien", widget=forms.URLInput(attrs={"class": SMALL})
+        required=False, assume_scheme="https", label=_("Link"), widget=forms.URLInput(attrs={"class": SMALL})
     )
 
     class Meta:
         model = VendorTicket
         fields = ["ref", "title", "description", "page", "tab", "status", "url", "created_on"]
         labels = {
-            "ref": "Référence Jira (à saisir une fois le ticket créé dans Jira)",
-            "title": "Titre du problème",
-            "description": "Description",
-            "page": "Page",
-            "tab": "Onglet",
-            "status": "Statut chez Aptean",
-            "url": "Lien",
-            "created_on": "Date de création chez Aptean",
+            "ref": _("Jira reference (to enter once the ticket is created in Jira)"),
+            "title": _("Problem title"),
+            "description": _("Description"),
+            "page": _("Page"),
+            "tab": _("Tab"),
+            "status": _("Status at Aptean"),
+            "url": _("Link"),
+            "created_on": _("Creation date at Aptean"),
         }
         widgets = {
             "ref": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", "data-focus-end": ""}),
@@ -185,14 +189,16 @@ class VendorTicketForm(forms.ModelForm):
         if ref_required:
             # Creation from a feedback: the Jira ticket is created at the same time, its number is typed here.
             self.fields["ref"].required = True
-            self.fields["ref"].label = "Référence Jira"
+            self.fields["ref"].label = _("Jira reference")
 
     def clean_ref(self):
         """The bare Jira prefix (number not typed yet) is not a reference; empty means no reference (NULL)."""
         ref = (self.cleaned_data.get("ref") or "").strip()
         if ref == settings.JIRA_REF_PREFIX:
             if self.fields["ref"].required:
-                raise forms.ValidationError(f"Indiquez le numéro du ticket après « {settings.JIRA_REF_PREFIX} ».")
+                raise forms.ValidationError(
+                    _("Enter the ticket number after “%(prefix)s”."), params={"prefix": settings.JIRA_REF_PREFIX}
+                )
             return None
         return ref or None
 
