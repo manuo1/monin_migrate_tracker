@@ -1,9 +1,10 @@
 {% extends "tracker/base.html" %}
-{% block title %}Session expirée{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Session expired" %}{% endblock %}
 {% block content %}
 <div class="alert alert-warning">
-  <h1 class="h4">Formulaire expiré</h1>
-  <p class="mb-2">La session ou le formulaire n'est plus valide (page restée ouverte trop longtemps, ou cookies bloqués). Rien n'a été enregistré : rechargez la page puis recommencez.</p>
-  <a href="/" class="btn btn-sm btn-outline-secondary">Retour à l'accueil</a>
+  <h1 class="h4">{% translate "Form expired" %}</h1>
+  <p class="mb-2">{% translate "The session or the form is no longer valid (page left open too long, or cookies blocked). Nothing was saved: reload the page and try again." %}</p>
+  <a href="/" class="btn btn-sm btn-outline-secondary">{% translate "Back to home" %}</a>
 </div>
 {% endblock %}

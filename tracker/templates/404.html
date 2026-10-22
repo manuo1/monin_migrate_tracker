@@ -1,9 +1,10 @@
 {% extends "tracker/base.html" %}
-{% block title %}Page introuvable{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Page not found" %}{% endblock %}
 {% block content %}
 <div class="alert alert-secondary">
-  <h1 class="h4">Page introuvable</h1>
-  <p class="mb-2">Cette page n'existe pas ou a été déplacée.</p>
-  <a href="/" class="btn btn-sm btn-outline-secondary">Retour à l'accueil</a>
+  <h1 class="h4">{% translate "Page not found" %}</h1>
+  <p class="mb-2">{% translate "This page does not exist or has been moved." %}</p>
+  <a href="/" class="btn btn-sm btn-outline-secondary">{% translate "Back to home" %}</a>
 </div>
 {% endblock %}

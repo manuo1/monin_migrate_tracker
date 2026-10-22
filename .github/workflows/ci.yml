@@ -46,6 +46,9 @@ jobs:
           cache: pip
           cache-dependency-path: requirements*.txt
       - run: pip install -r requirements-dev.txt
+      - run: python manage.py compilemessages
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.test
       - run: pytest
 
   e2e:
@@ -74,6 +77,9 @@ jobs:
           cache: pip
           cache-dependency-path: requirements*.txt
       - run: pip install -r requirements-dev.txt
+      - run: python manage.py compilemessages
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.test
       - run: playwright install --with-deps chromium
       - run: pytest -m e2e
 

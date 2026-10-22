@@ -1,9 +1,10 @@
 {% extends "tracker/base.html" %}
-{% block title %}Accès refusé{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Access denied" %}{% endblock %}
 {% block content %}
 <div class="alert alert-warning">
-  <h1 class="h4">Accès refusé</h1>
-  <p class="mb-2">Vous n'avez pas les droits nécessaires pour cette action.</p>
-  <a href="/" class="btn btn-sm btn-outline-secondary">Retour à l'accueil</a>
+  <h1 class="h4">{% translate "Access denied" %}</h1>
+  <p class="mb-2">{% translate "You do not have the required permissions for this action." %}</p>
+  <a href="/" class="btn btn-sm btn-outline-secondary">{% translate "Back to home" %}</a>
 </div>
 {% endblock %}

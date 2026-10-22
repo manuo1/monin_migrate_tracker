@@ -36,6 +36,8 @@ htmlcov/
 staticfiles/
 logs/
 *.log
+# Compiled catalogues: `python manage.py compilemessages` (the .po files are the source)
+*.mo
 
 # Editors / OS
 .idea/

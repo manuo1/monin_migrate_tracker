@@ -5,10 +5,13 @@ Adding, renaming or removing a status changes those `choices`: run `makemigratio
 If the code of an existing status changes, a data migration is also needed; a new color or label needs none.
 
 This module only holds definitions. State-change rules live in `rules.py`.
+Labels are English msgids (`gettext_lazy`), translated in `locale/<lang>/LC_MESSAGES/django.po`.
 """
 
 from dataclasses import dataclass
 from enum import StrEnum
+
+from django.utils.translation import gettext_lazy as _
 
 
 class StatusCategory(StrEnum):
@@ -49,15 +52,15 @@ CLOSED = "closed"
 
 # The order of this list is the display and sort order.
 FEEDBACK_STATUSES = [
-    FeedbackStatus(NEW, "Nouveau", "secondary", StatusCategory.TODO),
-    FeedbackStatus(IN_ANALYSIS, "En analyse", "primary", StatusCategory.IN_PROGRESS),
-    FeedbackStatus(TO_REPLAY_WITH_USER, "À rejouer avec l'utilisateur", "warning", StatusCategory.IN_PROGRESS),
-    FeedbackStatus(SENT_TO_VENDOR, "Transmis Aptean", "info", StatusCategory.IN_PROGRESS),
-    FeedbackStatus(RETEST_STAFF, "À retester (staff)", "warning", StatusCategory.IN_PROGRESS),
-    FeedbackStatus(RETEST_USER, "À retester (utilisateur)", "primary", StatusCategory.IN_PROGRESS),
-    FeedbackStatus(TEST_FAILED, "Test KO", "danger", StatusCategory.IN_PROGRESS),
-    FeedbackStatus(TEST_PASSED, "Test OK", "success", StatusCategory.DONE),
-    FeedbackStatus(CLOSED, "Clos", "success", StatusCategory.DONE),
+    FeedbackStatus(NEW, _("New"), "secondary", StatusCategory.TODO),
+    FeedbackStatus(IN_ANALYSIS, _("In analysis"), "primary", StatusCategory.IN_PROGRESS),
+    FeedbackStatus(TO_REPLAY_WITH_USER, _("To replay with the user"), "warning", StatusCategory.IN_PROGRESS),
+    FeedbackStatus(SENT_TO_VENDOR, _("Sent to Aptean"), "info", StatusCategory.IN_PROGRESS),
+    FeedbackStatus(RETEST_STAFF, _("To retest (staff)"), "warning", StatusCategory.IN_PROGRESS),
+    FeedbackStatus(RETEST_USER, _("To retest (user)"), "primary", StatusCategory.IN_PROGRESS),
+    FeedbackStatus(TEST_FAILED, _("Test failed"), "danger", StatusCategory.IN_PROGRESS),
+    FeedbackStatus(TEST_PASSED, _("Test passed"), "success", StatusCategory.DONE),
+    FeedbackStatus(CLOSED, _("Closed"), "success", StatusCategory.DONE),
 ]
 
 # Vendor ticket status codes (the status is optional on a vendor ticket: empty string when unknown).
@@ -67,10 +70,10 @@ VENDOR_CLOSED = "closed"
 VENDOR_BLOCKED = "blocked"
 
 VENDOR_STATUSES = [
-    VendorStatus(VENDOR_IN_PROGRESS, "En cours", "primary"),
-    VendorStatus(VENDOR_TO_TEST, "À tester", "warning"),
-    VendorStatus(VENDOR_CLOSED, "Clos", "success"),
-    VendorStatus(VENDOR_BLOCKED, "Bloqué", "danger"),
+    VendorStatus(VENDOR_IN_PROGRESS, _("In progress"), "primary"),
+    VendorStatus(VENDOR_TO_TEST, _("To test"), "warning"),
+    VendorStatus(VENDOR_CLOSED, _("Closed"), "success"),
+    VendorStatus(VENDOR_BLOCKED, _("Blocked"), "danger"),
 ]
 
 FEEDBACK_STATUS_BY_CODE = {s.code: s for s in FEEDBACK_STATUSES}

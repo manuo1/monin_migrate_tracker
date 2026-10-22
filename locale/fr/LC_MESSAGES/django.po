@@ -1,0 +1,70 @@
+# French translation of the Monin Migrate Tracker.
+# This file is distributed under the same license as the project (MIT).
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: monin_migrate_tracker\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-22 18:25+0200\n"
+"PO-Revision-Date: 2026-10-22 18:30+0200\n"
+"Last-Translator: Emmanuel Oudot\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Bug"
+msgstr "Anomalie"
+
+msgid "Test passed"
+msgstr "Test OK"
+
+msgid "Suggestion"
+msgstr "Proposition"
+
+msgid "Fixed"
+msgstr "Corrigé"
+
+msgid "Not reproduced (user agreed)"
+msgstr "Non reproduit (accord utilisateur)"
+
+msgid "Product evolution (not a bug)"
+msgstr "Évolution produit (pas une anomalie)"
+
+msgid "Rejected"
+msgstr "Rejeté"
+
+msgid "New"
+msgstr "Nouveau"
+
+msgid "In analysis"
+msgstr "En analyse"
+
+msgid "To replay with the user"
+msgstr "À rejouer avec l'utilisateur"
+
+msgid "Sent to Aptean"
+msgstr "Transmis Aptean"
+
+msgid "To retest (staff)"
+msgstr "À retester (staff)"
+
+msgid "To retest (user)"
+msgstr "À retester (utilisateur)"
+
+msgid "Test failed"
+msgstr "Test KO"
+
+msgid "Closed"
+msgstr "Clos"
+
+msgid "In progress"
+msgstr "En cours"
+
+msgid "To test"
+msgstr "À tester"
+
+msgid "Blocked"
+msgstr "Bloqué"
