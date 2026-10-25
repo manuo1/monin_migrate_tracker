@@ -17,7 +17,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY --chown=app:app . .
 
-# Throwaway values: collectstatic only needs settings to import, nothing is stored in the image.
+# Throwaway values: collectstatic and compilemessages only need settings to import, nothing is stored in the image.
+# gettext is needed only to compile the .mo files (git-ignored): installed then removed in the same layer.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gettext \
+    && SECRET_KEY=build-only ALLOWED_HOSTS=build-only python manage.py compilemessages \
+    && apt-get purge -y --auto-remove gettext \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN SECRET_KEY=build-only ALLOWED_HOSTS=build-only python manage.py collectstatic --noinput \
     && chown -R app:app /app/staticfiles
 
