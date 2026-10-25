@@ -29,8 +29,8 @@ All the application code is in the `tracker` package.
 - `forms.py`, `views/`, `templates/`, `static/`: the web layer. Views are thin and check permissions.
 - `timeline.py`: builds the merged history shown on a feedback page.
 - `admin.py`: Django admin with the reference-list CSV import and the "out of reference" filter.
-- `middleware.py`: Content Security Policy header. `logs.py`: JSON log formatter.
-  `context_processors.py`: reference lists for the inputs.
+- `middleware.py`: Content Security Policy header and language selection (`CookieLocaleMiddleware`). `logs.py`: JSON log
+  formatter. `context_processors.py`: reference lists for the inputs.
 
 The rule behind this split: a decision can be tested without a database (`rules`), a change always goes through one
 transaction (`services`), and the history cannot be bypassed (`history`).
@@ -78,6 +78,10 @@ else is forced to download).
 - Static JavaScript only: no inline script or event handler, which allows a strict `script-src 'self'` policy.
   Bootstrap and Tom Select are vendored under `tracker/static/vendor/` (see its README for versions and upgrade steps).
 - Storage goes through Django `STORAGES`, so moving attachments to object storage later is a configuration change.
+- Two interface languages (French by default, English), chosen with a cookie, never from the browser's
+  `Accept-Language`. User-written content is never translated. History events are stored in the database in English
+  only, whatever the writer's language (lazy labels are evaluated under `translation.override("en")`), so they read
+  the same for everyone; the timeline's own lines (creation, status changes) are translated at display time.
 - Not built on purpose: notifications (staff communicates with users directly), dashboards, status age, pagination
   (the expected volume is around 1000 feedbacks), attachment size or type limits.
 

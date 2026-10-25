@@ -4,7 +4,7 @@ Internal web tool to follow the migration of an application to a new version del
 Testers report **feedbacks** (bug, successful test, suggestion) about a page of the migrated application.
 The maintainer triages them, groups them, and links them to the **vendor tickets** (Jira) that track the fixes.
 
-> Work in progress. Code and documentation are in English, the end-user interface is in French.
+> Work in progress. Code and documentation are in English, the end-user interface is in French (default) and English.
 
 ## Features
 
@@ -14,6 +14,7 @@ The maintainer triages them, groups them, and links them to the **vendor tickets
 - Vendor tickets: list, detail, creation from a feedback (pre-filled title and description), association, link to Jira.
 - Page / tab reference lists (suggestions on inputs, free entry allowed), imported from CSV in the admin.
 - Security: login throttling, strict Content Security Policy, attachments served only to authenticated users.
+- Interface in French and English (FR / EN switch in the navigation bar).
 - Operations: Docker (app + PostgreSQL), structured JSON logs, backup and restore scripts.
 
 ## Stack
