@@ -644,3 +644,9 @@ msgstr "One value per line (first column). Duplicates and values already present
 
 msgid "Import"
 msgstr "Import"
+
+msgid "Ticket created (status: %(status)s)"
+msgstr "Ticket created (status: %(status)s)"
+
+msgid "Status → %(status)s"
+msgstr "Status → %(status)s"

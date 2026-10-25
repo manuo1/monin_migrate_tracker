@@ -88,7 +88,7 @@ def test_staff_edit_saves_and_traces_each_changed_field(client):
     events = list(feedback.events.all())
     assert len(events) == 4
     assert all(e.author == staff for e in events)
-    assert any(e.text.startswith("Page modifié") and "Clients" in e.text for e in events)
+    assert any(e.text.startswith("Page modified") and "Clients" in e.text for e in events)
 
 
 def test_unchanged_form_writes_no_history(client):

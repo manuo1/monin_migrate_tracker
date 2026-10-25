@@ -91,7 +91,7 @@ def test_closing_with_a_reason_and_an_explanation(client):
     assert (feedback.status, feedback.closure_reason) == (CLOSED, "rejected")
     comment = feedback.comments.get()
     assert (comment.text, comment.author) == ("Hors périmètre", staff)
-    assert any(e.text.startswith("Motif de clôture") for e in feedback.events.all())
+    assert any(e.text.startswith("Closure reason") for e in feedback.events.all())
 
 
 def test_unchanged_status_adds_no_status_row(client):
@@ -124,7 +124,7 @@ def test_linking_a_vendor_ticket_to_a_new_feedback_transmits_it(client):
     assert list(feedback.vendor_tickets.all()) == [ticket]
     assert feedback.status == SENT_TO_VENDOR
     assert "Le ticket passe en" in response.content.decode()
-    assert any(e.text == f"Ticket Aptean ajouté : {ticket.label}" for e in feedback.events.all())
+    assert any(e.text == f"Aptean ticket added: {ticket.label}" for e in feedback.events.all())
 
 
 def test_status_chosen_by_staff_is_respected_when_linking(client):
@@ -150,7 +150,7 @@ def test_unlinking_vendor_tickets(client):
     feedback.refresh_from_db()
     assert not feedback.vendor_tickets.exists()
     assert feedback.status == SENT_TO_VENDOR
-    assert any(e.text == f"Ticket Aptean retiré : {ticket.label}" for e in feedback.events.all())
+    assert any(e.text == f"Aptean ticket removed: {ticket.label}" for e in feedback.events.all())
 
 
 # --- Invalid input ---

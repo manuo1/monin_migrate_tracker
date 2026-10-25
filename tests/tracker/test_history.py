@@ -1,6 +1,8 @@
 import datetime
 from types import SimpleNamespace
 
+from django.utils import translation
+
 from tracker import history
 
 
@@ -29,29 +31,37 @@ def test_no_text_when_nothing_changed():
 
 def test_changed_field_is_described_with_old_and_new_value():
     texts = history.diff_texts(feedback_like(page="Articles"), feedback_like(page="Clients"))
-    assert texts == ['Page modifié : "Articles" → "Clients"']
+    assert texts == ['Page modified: "Articles" → "Clients"']
 
 
 def test_empty_values_are_shown_as_empty():
     texts = history.diff_texts(feedback_like(tab=""), feedback_like(tab="Prix"))
-    assert texts == ['Onglet modifié : "(vide)" → "Prix"']
+    assert texts == ['Tab modified: "(empty)" → "Prix"']
 
 
-def test_type_is_shown_with_its_label():
+def test_type_is_shown_with_its_english_label():
     texts = history.diff_texts(feedback_like(type="bug"), feedback_like(type="suggestion"))
-    assert texts == ['Type modifié : "Anomalie" → "Proposition"']
+    assert texts == ['Type modified: "Bug" → "Suggestion"']
 
 
 def test_one_text_per_changed_field_in_declaration_order():
     texts = history.diff_texts(feedback_like(), feedback_like(page="Clients", description="Other"))
-    assert texts == ['Page modifié : "Articles" → "Clients"', 'Description modifié : "Text" → "Other"']
+    assert texts == ['Page modified: "Articles" → "Clients"', 'Description modified: "Text" → "Other"']
 
 
-def test_vendor_status_is_shown_with_its_label():
+def test_vendor_status_is_shown_with_its_english_label():
     texts = history.vendor_diff_texts(vendor_like(status=""), vendor_like(status="to_test"))
-    assert texts == ['Statut : "(vide)" → "À tester"']
+    assert texts == ['Status: "(empty)" → "To test"']
 
 
-def test_vendor_date_is_shown_day_first():
+def test_vendor_date_is_shown_in_iso_format():
     after = vendor_like(created_on=datetime.date(2026, 10, 5))
-    assert history.vendor_diff_texts(vendor_like(), after) == ['Date de création : "(vide)" → "05/10/2026"']
+    assert history.vendor_diff_texts(vendor_like(), after) == ['Creation date: "(empty)" → "2026-10-05"']
+
+
+def test_texts_are_english_whatever_the_active_language():
+    with translation.override("fr"):
+        feedback_texts = history.diff_texts(feedback_like(type="bug"), feedback_like(type="suggestion"))
+        vendor_texts = history.vendor_diff_texts(vendor_like(status=""), vendor_like(status="to_test"))
+    assert feedback_texts == ['Type modified: "Bug" → "Suggestion"']
+    assert vendor_texts == ['Status: "(empty)" → "To test"']

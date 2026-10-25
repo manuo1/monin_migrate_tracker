@@ -2,6 +2,7 @@ import pytest
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.utils import translation
 
 from tests.tracker.factories import FeedbackFactory, StaffFactory, UserFactory, VendorTicketFactory
 from tracker import services
@@ -31,6 +32,25 @@ def status_history(feedback):
 
 def event_texts(obj):
     return [event.text for event in obj.events.all()]
+
+
+# --- stored event texts are English whatever the writer's language ---
+
+
+def test_stored_events_are_english_when_the_writer_uses_french():
+    feedback = FeedbackFactory(status=NEW, type=FeedbackType.BUG)
+    ticket = VendorTicketFactory(status="")
+    before_feedback = Feedback.objects.get(pk=feedback.pk)
+    before_ticket = VendorTicket.objects.get(pk=ticket.pk)
+    staff = StaffFactory()
+    with translation.override("fr"):
+        feedback.type = FeedbackType.SUGGESTION
+        services.save_changes(before_feedback, feedback, staff)
+        services.change_status(feedback, CLOSED, staff, closure_reason=ClosureReason.REJECTED)
+        ticket.status = VENDOR_TO_TEST
+        services.save_vendor_ticket(before_ticket, ticket, staff)
+    assert event_texts(feedback) == ['Type modified: "Bug" → "Suggestion"', "Closure reason: Rejected"]
+    assert event_texts(ticket) == ['Status: "(empty)" → "To test"']
 
 
 # --- create_feedback ---
@@ -66,7 +86,7 @@ def test_create_feedback_from_a_source_reuses_files_and_traces_the_copy():
     )
     assert [a.file.name for a in copy.attachments.all()] == [attachment.file.name]
     assert other.file.name not in [a.file.name for a in copy.attachments.all()]
-    assert event_texts(copy) == [f"Ticket copié depuis le ticket #{source.pk} (pièces jointes reprises : a.png)"]
+    assert event_texts(copy) == [f"Ticket copied from ticket #{source.pk} (attachments carried over: a.png)"]
 
 
 # --- save_changes ---
@@ -77,7 +97,7 @@ def test_save_changes_traces_modified_fields_and_returns_their_count():
     before = Feedback.objects.get(pk=feedback.pk)
     feedback.page = "Clients"
     assert services.save_changes(before, feedback, StaffFactory()) == 1
-    assert event_texts(feedback) == ['Page modifié : "Articles" → "Clients"']
+    assert event_texts(feedback) == ['Page modified: "Articles" → "Clients"']
     assert Feedback.objects.get(pk=feedback.pk).page == "Clients"
 
 
@@ -94,7 +114,7 @@ def test_save_changes_without_modification_traces_nothing():
 def test_add_attachments_traces_all_names():
     feedback = FeedbackFactory()
     services.add_attachments(feedback, [upload("a.png"), upload("b.png")], StaffFactory())
-    assert event_texts(feedback) == ["Pièce(s) jointe(s) ajoutée(s) : a.png, b.png"]
+    assert event_texts(feedback) == ["Attachment(s) added: a.png, b.png"]
 
 
 def test_remove_attachment_unlinks_it_but_keeps_the_file_on_disk():
@@ -104,7 +124,7 @@ def test_remove_attachment_unlinks_it_but_keeps_the_file_on_disk():
     services.remove_attachment(feedback, attachment, StaffFactory())
     assert feedback.attachments.count() == 0
     assert default_storage.exists(stored_name)
-    assert event_texts(feedback) == ["Pièce jointe supprimée : a.png"]
+    assert event_texts(feedback) == ["Attachment removed: a.png"]
 
 
 def test_removing_a_copied_attachment_keeps_the_file_for_the_other_feedback():
@@ -142,14 +162,14 @@ def test_change_status_traces_the_closure_reason_and_turns_the_explanation_into_
     )
     feedback.refresh_from_db()
     assert feedback.closure_reason == ClosureReason.REJECTED
-    assert event_texts(feedback) == ["Motif de clôture : Rejeté"]
+    assert event_texts(feedback) == ["Closure reason: Rejected"]
     assert [c.text for c in feedback.comments.all()] == ["Out of scope"]
 
 
 def test_change_status_traces_the_removal_of_a_closure_reason():
     feedback = FeedbackFactory(status=CLOSED, closure_reason=ClosureReason.FIXED)
     services.change_status(feedback, IN_ANALYSIS, StaffFactory(), closure_reason="")
-    assert event_texts(feedback) == ["Motif de clôture retiré"]
+    assert event_texts(feedback) == ["Closure reason removed"]
 
 
 def test_change_status_without_explanation_adds_no_comment():
@@ -220,8 +240,8 @@ def test_adding_a_vendor_ticket_to_a_new_feedback_sends_it_to_the_vendor():
     feedback.refresh_from_db()
     assert feedback.status == SENT_TO_VENDOR
     assert status_history(feedback) == [SENT_TO_VENDOR]
-    assert event_texts(feedback) == [f"Ticket Aptean ajouté : {ticket.ref}"]
-    assert event_texts(ticket) == [f"Lié au ticket Monin #{feedback.pk}"]
+    assert event_texts(feedback) == [f"Aptean ticket added: {ticket.ref}"]
+    assert event_texts(ticket) == [f"Linked to Monin ticket #{feedback.pk}"]
 
 
 def test_adding_a_vendor_ticket_does_not_change_a_feedback_that_is_not_new():
@@ -253,8 +273,8 @@ def test_removing_a_vendor_ticket_is_traced_on_both_sides_and_keeps_the_status()
     assert services.update_vendor_links(feedback, [], StaffFactory()) is True
     feedback.refresh_from_db()
     assert feedback.status == SENT_TO_VENDOR
-    assert event_texts(feedback) == [f"Ticket Aptean retiré : {ticket.ref}"]
-    assert event_texts(ticket) == [f"Délié du ticket Monin #{feedback.pk}"]
+    assert event_texts(feedback) == [f"Aptean ticket removed: {ticket.ref}"]
+    assert event_texts(ticket) == [f"Unlinked from Monin ticket #{feedback.pk}"]
 
 
 def test_link_vendor_ticket_keeps_the_existing_links():
@@ -317,14 +337,14 @@ def test_create_vendor_ticket_from_a_feedback_traces_creation_links_and_transmit
     assert feedback.status == SENT_TO_VENDOR
     assert list(feedback.vendor_tickets.all()) == [ticket]
     assert event_texts(ticket) == [
-        f"Ticket Aptean créé depuis le ticket Monin #{feedback.pk}",
-        f"Lié au ticket Monin #{feedback.pk}",
+        f"Aptean ticket created from Monin ticket #{feedback.pk}",
+        f"Linked to Monin ticket #{feedback.pk}",
     ]
 
 
 def test_create_vendor_ticket_without_a_feedback_is_only_traced_as_created():
     ticket = services.create_vendor_ticket(author=StaffFactory(), ref="TEST-901", title="T")
-    assert event_texts(ticket) == ["Ticket Aptean créé"]
+    assert event_texts(ticket) == ["Aptean ticket created"]
 
 
 def test_save_vendor_ticket_traces_modified_fields_and_returns_their_count():
@@ -333,7 +353,7 @@ def test_save_vendor_ticket_traces_modified_fields_and_returns_their_count():
     ticket.title = "New"
     ticket.status = VENDOR_TO_TEST
     assert services.save_vendor_ticket(before, ticket, StaffFactory()) == 2
-    assert event_texts(ticket) == ['Titre : "Old" → "New"', 'Statut : "(vide)" → "À tester"']
+    assert event_texts(ticket) == ['Title: "Old" → "New"', 'Status: "(empty)" → "To test"']
 
 
 def test_vendor_description_follows_the_jira_format_and_keeps_empty_headings():

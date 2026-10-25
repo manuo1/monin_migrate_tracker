@@ -13,8 +13,12 @@ copy from another feedback. Traced events (vendor ticket): creation, fields, fee
 Deliberately not traced: attachments provided at creation (part of the creation) and everything done in the Django
 admin (emergency tool, including ticket deletion).
 
-Event texts are shown to users, hence in French.
+Event texts are stored in the database and identical for everyone: ENGLISH ONLY, whatever the active language.
+Lazy labels (type, closure reason, vendor status) are evaluated under `translation.override("en")` (see `_en`):
+a stored f-string would otherwise be frozen in the writer's language.
 """
+
+from django.utils import translation
 
 from .choices import ClosureReason, FeedbackType
 from .models import FeedbackEvent, StatusChange, VendorTicketEvent
@@ -31,8 +35,14 @@ def _vendor_event(ticket, author, text):
     VendorTicketEvent.objects.create(ticket=ticket, author=author, text=text)
 
 
+def _en(label):
+    """English text of a lazy label, whatever the active language."""
+    with translation.override("en"):
+        return str(label)
+
+
 def _shown(value):
-    return value if value not in ("", None) else "(vide)"
+    return value if value not in ("", None) else "(empty)"
 
 
 # --- Feedback: form fields ---
@@ -41,15 +51,15 @@ def _shown(value):
 TRACKED_FIELDS = {
     "type": "Type",
     "page": "Page",
-    "tab": "Onglet",
-    "article_id": "Article testé",
+    "tab": "Tab",
+    "article_id": "Tested article",
     "description": "Description",
 }
 
 
 def _shown_field(field, value):
     if field == "type":
-        value = dict(FeedbackType.choices).get(value, value)
+        value = _en(dict(FeedbackType.choices).get(value, value))
     return _shown(value)
 
 
@@ -59,7 +69,7 @@ def diff_texts(before, after):
     for field, label in TRACKED_FIELDS.items():
         old, new = getattr(before, field), getattr(after, field)
         if old != new:
-            texts.append(f'{label} modifié : "{_shown_field(field, old)}" → "{_shown_field(field, new)}"')
+            texts.append(f'{label} modified: "{_shown_field(field, old)}" → "{_shown_field(field, new)}"')
     return texts
 
 
@@ -81,9 +91,9 @@ def record_status(feedback, author):
 
 def record_closure_reason(feedback, author, reason):
     if reason:
-        _event(feedback, author, f"Motif de clôture : {ClosureReason(reason).label}")
+        _event(feedback, author, f"Closure reason: {_en(ClosureReason(reason).label)}")
     else:
-        _event(feedback, author, "Motif de clôture retiré")
+        _event(feedback, author, "Closure reason removed")
 
 
 # --- Feedback <-> vendor ticket links (one line on each side) ---
@@ -94,11 +104,11 @@ def record_links(feedback, before, after, author):
     added = sorted(set(after) - set(before), key=lambda t: t.label)
     removed = sorted(set(before) - set(after), key=lambda t: t.label)
     for ticket in added:
-        _event(feedback, author, f"Ticket Aptean ajouté : {ticket.label}")
-        _vendor_event(ticket, author, f"Lié au ticket Monin #{feedback.pk}")
+        _event(feedback, author, f"Aptean ticket added: {ticket.label}")
+        _vendor_event(ticket, author, f"Linked to Monin ticket #{feedback.pk}")
     for ticket in removed:
-        _event(feedback, author, f"Ticket Aptean retiré : {ticket.label}")
-        _vendor_event(ticket, author, f"Délié du ticket Monin #{feedback.pk}")
+        _event(feedback, author, f"Aptean ticket removed: {ticket.label}")
+        _vendor_event(ticket, author, f"Unlinked from Monin ticket #{feedback.pk}")
     return bool(added or removed)
 
 
@@ -106,39 +116,39 @@ def record_links(feedback, before, after, author):
 
 
 def record_attachments_added(feedback, author, names):
-    _event(feedback, author, "Pièce(s) jointe(s) ajoutée(s) : " + ", ".join(names))
+    _event(feedback, author, "Attachment(s) added: " + ", ".join(names))
 
 
 def record_attachment_removed(feedback, author, name):
-    _event(feedback, author, f"Pièce jointe supprimée : {name}")
+    _event(feedback, author, f"Attachment removed: {name}")
 
 
 def record_copy(feedback, author, source, attachment_names=()):
-    text = f"Ticket copié depuis le ticket #{source.pk}"
+    text = f"Ticket copied from ticket #{source.pk}"
     if attachment_names:
-        text += " (pièces jointes reprises : " + ", ".join(attachment_names) + ")"
+        text += " (attachments carried over: " + ", ".join(attachment_names) + ")"
     _event(feedback, author, text)
 
 
 # --- Vendor ticket ---
 
 VENDOR_TRACKED_FIELDS = {
-    "ref": "Référence",
-    "title": "Titre",
+    "ref": "Reference",
+    "title": "Title",
     "description": "Description",
     "page": "Page",
-    "tab": "Onglet",
-    "status": "Statut",
-    "url": "Lien",
-    "created_on": "Date de création",
+    "tab": "Tab",
+    "status": "Status",
+    "url": "Link",
+    "created_on": "Creation date",
 }
 
 
 def _shown_vendor_field(field, value):
     if field == "status":
-        value = VENDOR_STATUS_BY_CODE[value].label if value in VENDOR_STATUS_BY_CODE else ""
+        value = _en(VENDOR_STATUS_BY_CODE[value].label) if value in VENDOR_STATUS_BY_CODE else ""
     elif field == "created_on" and value:
-        value = value.strftime("%d/%m/%Y")
+        value = value.strftime("%Y-%m-%d")
     return _shown(value)
 
 
@@ -148,7 +158,7 @@ def vendor_diff_texts(before, after):
     for field, label in VENDOR_TRACKED_FIELDS.items():
         old, new = getattr(before, field), getattr(after, field)
         if old != new:
-            texts.append(f'{label} : "{_shown_vendor_field(field, old)}" → "{_shown_vendor_field(field, new)}"')
+            texts.append(f'{label}: "{_shown_vendor_field(field, old)}" → "{_shown_vendor_field(field, new)}"')
     return texts
 
 
@@ -161,7 +171,7 @@ def record_vendor_field_changes(before, after, author):
 
 
 def record_vendor_creation(ticket, author, feedback=None):
-    text = "Ticket Aptean créé"
+    text = "Aptean ticket created"
     if feedback is not None:
-        text += f" depuis le ticket Monin #{feedback.pk}"
+        text += f" from Monin ticket #{feedback.pk}"
     _vendor_event(ticket, author, text)

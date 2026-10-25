@@ -1,6 +1,7 @@
 import datetime
 
 import pytest
+from django.utils import translation
 
 from tests.tracker.factories import FeedbackFactory, UserFactory
 from tracker import history
@@ -48,3 +49,26 @@ def test_first_status_row_is_described_as_the_creation():
     feedback = FeedbackFactory(author=author, status=NEW)
     history.record_status(feedback, author)
     assert [item.text for item in build_timeline(feedback)] == ["Ticket créé (statut : Nouveau)"]
+
+
+def test_timeline_texts_follow_the_active_language():
+    author = UserFactory()
+    feedback = FeedbackFactory(author=author, status=NEW)
+    history.record_status(feedback, author)
+    with translation.override("en"):
+        assert [item.text for item in build_timeline(feedback)] == ["Ticket created (status: New)"]
+
+
+def test_status_change_text_follows_the_active_language():
+    author = UserFactory()
+    feedback = FeedbackFactory(author=author, status=NEW)
+    history.record_status(feedback, author)
+    feedback.status = IN_ANALYSIS
+    history.record_status(feedback, author)
+    first, second = StatusChange.objects.order_by("pk")
+    StatusChange.objects.filter(pk=first.pk).update(date=at(1))
+    StatusChange.objects.filter(pk=second.pk).update(date=at(2))
+    with translation.override("en"):
+        assert build_timeline(feedback)[0].text == "Status → In analysis"
+    with translation.override("fr"):
+        assert build_timeline(feedback)[0].text == "Statut → En analyse"

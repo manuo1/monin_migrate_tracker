@@ -644,3 +644,9 @@ msgstr "Une valeur par ligne (première colonne). Les doublons et valeurs déjà
 
 msgid "Import"
 msgstr "Importer"
+
+msgid "Ticket created (status: %(status)s)"
+msgstr "Ticket créé (statut : %(status)s)"
+
+msgid "Status → %(status)s"
+msgstr "Statut → %(status)s"

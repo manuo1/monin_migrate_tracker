@@ -113,8 +113,8 @@ def test_staff_edit_saves_and_traces_each_changed_field(client):
     events = list(ticket.events.all())
     assert len(events) == 6
     assert all(e.author == staff for e in events)
-    assert any(e.text.startswith("Titre") and "Après" in e.text for e in events)
-    assert any(e.text.startswith("Statut") and "À tester" in e.text for e in events)
+    assert any(e.text.startswith("Title") and "Après" in e.text for e in events)
+    assert any(e.text.startswith("Status") and "To test" in e.text for e in events)
 
 
 def test_unchanged_form_writes_no_history(client):
