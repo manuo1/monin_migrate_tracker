@@ -650,3 +650,40 @@ msgstr "Ticket créé (statut : %(status)s)"
 
 msgid "Status → %(status)s"
 msgstr "Statut → %(status)s"
+
+# Texts of the static JS files (tracker/_js_strings.html)
+msgid "No preview for this file type."
+msgstr "Pas d'aperçu pour ce type de fichier."
+
+msgid "Download the file"
+msgstr "Télécharger le fichier"
+
+msgid "Delete this attachment?"
+msgstr "Supprimer cette pièce jointe ?"
+
+msgid "Remove"
+msgstr "Retirer"
+
+msgid "Sending: {names}"
+msgstr "Envoi en cours : {names}"
+
+msgid "Copied"
+msgstr "Copié"
+
+msgid "Problem description"
+msgstr "Description du problème"
+
+msgid "What was tested"
+msgstr "Ce qui a été testé"
+
+msgid "Proposed improvement"
+msgstr "Amélioration proposée"
+
+msgid "Type to search or enter a value..."
+msgstr "Taper pour rechercher ou saisir..."
+
+msgid "Use “{value}” (not in the list)"
+msgstr "Utiliser « {value} » (hors liste)"
+
+msgid "No match"
+msgstr "Aucune correspondance"

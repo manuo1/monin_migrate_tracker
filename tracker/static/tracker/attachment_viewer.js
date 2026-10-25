@@ -6,6 +6,7 @@
   var items = Array.prototype.slice.call(document.querySelectorAll(".attachment-item"));
   var viewer = document.getElementById("attachment-viewer");
   if (!items.length || !viewer) return;
+  var texts = document.getElementById("js-strings").dataset; // translated by the template
 
   var content = document.getElementById("viewer-content");
   var caption = document.getElementById("viewer-caption");
@@ -42,11 +43,11 @@
       title.textContent = d.name;
       var info = document.createElement("div");
       info.className = "mb-3 text-white-50";
-      info.textContent = "Pas d'aperçu pour ce type de fichier.";
+      info.textContent = texts.noPreview;
       var download = document.createElement("a");
       download.href = d.url;
       download.className = "btn btn-light";
-      download.textContent = "Télécharger le fichier";
+      download.textContent = texts.download;
       el.appendChild(title);
       el.appendChild(info);
       el.appendChild(download);
@@ -96,7 +97,7 @@
   });
   if (deleteForm) {
     deleteForm.addEventListener("submit", function (e) {
-      if (!window.confirm("Supprimer cette pièce jointe ?")) e.preventDefault();
+      if (!window.confirm(texts.confirmDelete)) e.preventDefault();
     });
   }
 })();

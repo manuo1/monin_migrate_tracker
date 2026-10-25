@@ -8,6 +8,7 @@
   var input = zone && zone.querySelector("input[type=file]");
   var staged = document.getElementById("attachment-staged");
   if (!input || !staged) return;
+  var texts = document.getElementById("js-strings").dataset; // translated by the template
 
   var auto = !!zone.dataset.auto;
   var transfer = new DataTransfer();
@@ -42,7 +43,7 @@
       preview = document.createElement("div");
       preview.className = "bg-light d-flex align-items-center justify-content-center fw-bold text-secondary";
       preview.style.height = "70px";
-      preview.textContent = file.type === "application/pdf" ? "PDF" : "FICHIER";
+      preview.textContent = file.type === "application/pdf" ? "PDF" : texts.file;
     }
     var name = document.createElement("div");
     name.className = "small text-truncate";
@@ -51,7 +52,7 @@
     var remove = document.createElement("button");
     remove.type = "button";
     remove.className = "btn btn-sm btn-danger position-absolute top-0 end-0 py-0 px-1";
-    remove.title = "Retirer";
+    remove.title = texts.remove;
     remove.textContent = "✕";
     remove.addEventListener("click", function () { removeAt(index); });
     box.appendChild(preview);
@@ -67,7 +68,7 @@
     staged.innerHTML = "";
     if (auto) {
       if (send && transfer.files.length) {
-        staged.textContent = "Envoi en cours : " + fileNames();
+        staged.textContent = texts.sending.replace("{names}", fileNames());
         input.form.submit();
       }
       return;

@@ -1,0 +1,18 @@
+{% load i18n %}
+{# Texts used by the static JS files (no inline JS: strict CSP). Translated here, read with `dataset` (data-no-preview -> dataset.noPreview). #}
+<div id="js-strings" hidden
+     data-no-preview="{% translate 'No preview for this file type.' %}"
+     data-download="{% translate 'Download the file' %}"
+     data-confirm-delete="{% translate 'Delete this attachment?' %}"
+     data-file="{% translate 'FILE' %}"
+     data-remove="{% translate 'Remove' %}"
+     data-sending="{% translate 'Sending: {names}' %}"
+     data-copied="{% translate 'Copied' %}"
+     data-label-bug="{% translate 'Problem description' %}"
+     data-label-test-passed="{% translate 'What was tested' %}"
+     data-label-suggestion="{% translate 'Proposed improvement' %}"
+     data-label-default="{% translate 'Description' %}"
+     data-ref-placeholder="{% translate 'Type to search or enter a value...' %}"
+     data-ref-create="{% translate 'Use “{value}” (not in the list)' %}"
+     data-ref-no-match="{% translate 'No match' %}"
+     data-ref-outside="{% translate 'Outside the reference list' %}"></div>

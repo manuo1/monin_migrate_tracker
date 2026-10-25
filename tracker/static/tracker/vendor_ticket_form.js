@@ -1,13 +1,14 @@
 // Vendor ticket creation form: "Copy" buttons (to paste into Jira) and cursor placed at the end of the Jira reference,
 // right after the prefix, so only the number is left to type.
 (function () {
+  const texts = document.getElementById("js-strings").dataset; // translated by the template
   document.querySelectorAll("[data-copy-target]").forEach(function (button) {
     button.addEventListener("click", function () {
       const field = document.getElementById(button.dataset.copyTarget);
       if (!field) return;
       const label = button.textContent;
       function done() {
-        button.textContent = "Copié";
+        button.textContent = texts.copied;
         setTimeout(function () {
           button.textContent = label;
         }, 1500);

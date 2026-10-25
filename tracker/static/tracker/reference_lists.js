@@ -5,6 +5,7 @@
   "use strict";
   if (!window.TomSelect) return; // CDN unreachable: the plain input + datalist still work.
   var container = document.getElementById("reference-lists");
+  var texts = document.getElementById("js-strings").dataset; // translated by the template
   var staff = container !== null && container.dataset.staff === "true";
 
   document.querySelectorAll("input[list='reference-pages'], input[list='reference-tabs']").forEach(function (input) {
@@ -25,13 +26,14 @@
       createOnBlur: true,
       persist: false,
       selectOnTab: true,
-      placeholder: "Taper pour rechercher ou saisir...",
+      placeholder: texts.refPlaceholder,
       render: {
         option_create: function (data, escape) {
-          return '<div class="create">Utiliser « <strong>' + escape(data.input) + "</strong> » (hors liste)</div>";
+          var parts = texts.refCreate.split("{value}");
+          return '<div class="create">' + escape(parts[0]) + "<strong>" + escape(data.input) + "</strong>" + escape(parts[1] || "") + "</div>";
         },
-        no_results: function () {
-          return '<div class="no-results">Aucune correspondance</div>';
+        no_results: function (data, escape) {
+          return '<div class="no-results">' + escape(texts.refNoMatch) + "</div>";
         },
       },
     });
@@ -42,7 +44,7 @@
       var outside = value !== "" && values.indexOf(value) === -1;
       select.control.classList.toggle("bg-warning-subtle", outside);
       select.control.classList.toggle("border-warning", outside);
-      select.control.title = outside ? "Hors liste de référence" : "";
+      select.control.title = outside ? texts.refOutside : "";
     }
     select.on("change", mark);
     mark();
