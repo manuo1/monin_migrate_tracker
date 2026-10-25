@@ -4,7 +4,7 @@ Internal web tool to follow the migration of an application to a new version del
 Testers report **feedbacks** (bug, successful test, suggestion) about a page of the migrated application.
 The maintainer triages them, groups them, and links them to the **vendor tickets** (Jira) that track the fixes.
 
-> Work in progress. Code and documentation are in English, the end-user interface is in French (default) and English.
+> Code and documentation are in English, the end-user interface is in French (default) and English.
 
 ## Features
 
