@@ -31,6 +31,7 @@ pip install -r requirements-dev.txt
 pre-commit install
 cp .env.example .env                 # then edit the values
 python manage.py migrate
+python manage.py compilemessages     # translations; needs the GNU gettext tools (see docs/development.md)
 python manage.py createsuperuser
 python manage.py runserver
 ```
@@ -41,7 +42,7 @@ report and answer retests.
 ## Common commands
 
 ```bash
-pytest                               # unit and integration tests (hermetic, no .env needed)
+pytest                               # unit and integration tests (hermetic, no .env needed; run compilemessages first)
 playwright install chromium          # once, for the browser tests
 pytest -m e2e                        # browser journeys (add --headed --slowmo 700 to watch)
 ruff check .
@@ -67,8 +68,10 @@ data or screenshots.
 ```
 config/            Django project (settings: base, dev, prod, test)
 tracker/           the application (models, rules, services, history, statuses, views, templates, static)
+locale/            translations (fr, en): .po files versioned, .mo compiled locally
 tests/             unit and integration tests; tests/e2e for the browser journeys
 scripts/           backup.sh and restore.sh
+docs/              deployment, architecture and development guides
 Dockerfile, docker-compose.yml
 ```
 

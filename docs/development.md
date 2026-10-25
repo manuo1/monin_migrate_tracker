@@ -9,6 +9,7 @@ pip install -r requirements-dev.txt
 pre-commit install
 cp .env.example .env                 # then edit the values
 python manage.py migrate
+python manage.py compilemessages     # needs the GNU gettext tools, see "Translations" below
 python manage.py createsuperuser
 python manage.py runserver           # development settings, reads .env
 ```

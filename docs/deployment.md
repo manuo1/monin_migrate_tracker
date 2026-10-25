@@ -137,4 +137,6 @@ Recommendations:
   lock a given account temporarily; the cost was accepted because the client IP is unreliable behind a proxy.
 - Attachments have no public URL: they are served by an authenticated view.
 - The app sends a strict Content Security Policy on every page except `/admin/`.
-- Session and CSRF cookies are `Secure`, so the application must be reached over HTTPS (the proxy provides it).
+- Session, CSRF and language cookies are `Secure`, so the application must be reached over HTTPS (the proxy provides it).
+- The interface language (French by default, English on request) is stored in a cookie; the browser's language is
+  ignored on purpose.
