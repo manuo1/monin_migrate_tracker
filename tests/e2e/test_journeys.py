@@ -106,3 +106,23 @@ def test_staff_creates_a_vendor_ticket_from_a_feedback(page, live_server, staff,
     feedback.refresh_from_db()
     assert list(feedback.vendor_tickets.all()) == [ticket]
     assert feedback.status == SENT_TO_VENDOR
+
+
+def test_user_switches_language_and_the_choice_sticks(page, live_server, user, login):
+    login(page, user)
+    page.goto(f"{live_server.url}/")
+    expect(page.locator("html")).to_have_attribute("lang", "fr")
+    expect(page.get_by_role("link", name="Tickets Aptean")).to_be_visible()
+
+    page.get_by_role("button", name="EN", exact=True).click()
+    expect(page.locator("html")).to_have_attribute("lang", "en")
+    expect(page.get_by_role("link", name="Aptean tickets")).to_be_visible()
+
+    # The choice is kept on the next pages (cookie).
+    page.get_by_role("link", name="Aptean tickets").click()
+    expect(page.locator("html")).to_have_attribute("lang", "en")
+    expect(page.get_by_role("button", name="Log out")).to_be_visible()
+
+    page.get_by_role("button", name="FR", exact=True).click()
+    expect(page.locator("html")).to_have_attribute("lang", "fr")
+    expect(page.get_by_role("button", name="Déconnexion")).to_be_visible()
