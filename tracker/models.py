@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 
 from .choices import ClosureReason, FeedbackType
 from .statuses import (
@@ -19,8 +21,8 @@ class Page(models.Model):
 
     class Meta:
         ordering = ["name"]
-        verbose_name = "page"
-        verbose_name_plural = "pages"
+        verbose_name = _("page")
+        verbose_name_plural = _("pages")
 
     def __str__(self):
         return self.name
@@ -33,8 +35,8 @@ class Tab(models.Model):
 
     class Meta:
         ordering = ["name"]
-        verbose_name = "onglet"
-        verbose_name_plural = "onglets"
+        verbose_name = _("tab")
+        verbose_name_plural = _("tabs")
 
     def __str__(self):
         return self.name
@@ -63,7 +65,7 @@ class VendorTicket(models.Model):
     @property
     def label(self):
         """Jira reference, or a placeholder while it is not entered yet."""
-        return self.ref or f"Sans réf. (#{self.pk})"
+        return self.ref or gettext("No ref. (#%(pk)s)") % {"pk": self.pk}
 
     @property
     def link(self):

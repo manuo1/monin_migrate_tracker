@@ -687,3 +687,14 @@ msgstr "Use “{value}” (not in the list)"
 
 msgid "No match"
 msgstr "No match"
+
+# Model names, vendor ticket placeholder
+msgid "pages"
+msgstr "pages"
+
+msgid "tabs"
+msgstr "tabs"
+
+#, python-format
+msgid "No ref. (#%(pk)s)"
+msgstr "No ref. (#%(pk)s)"

@@ -41,6 +41,12 @@ def _en(label):
         return str(label)
 
 
+def _ticket_label(ticket):
+    """English label of a vendor ticket (the no-reference placeholder is translated), for stored texts."""
+    with translation.override("en"):
+        return ticket.label
+
+
 def _shown(value):
     return value if value not in ("", None) else "(empty)"
 
@@ -101,13 +107,13 @@ def record_closure_reason(feedback, author, reason):
 
 def record_links(feedback, before, after, author):
     """`before` and `after`: sets of linked vendor tickets. Returns True if something changed."""
-    added = sorted(set(after) - set(before), key=lambda t: t.label)
-    removed = sorted(set(before) - set(after), key=lambda t: t.label)
+    added = sorted(set(after) - set(before), key=_ticket_label)
+    removed = sorted(set(before) - set(after), key=_ticket_label)
     for ticket in added:
-        _event(feedback, author, f"Aptean ticket added: {ticket.label}")
+        _event(feedback, author, f"Aptean ticket added: {_ticket_label(ticket)}")
         _vendor_event(ticket, author, f"Linked to Monin ticket #{feedback.pk}")
     for ticket in removed:
-        _event(feedback, author, f"Aptean ticket removed: {ticket.label}")
+        _event(feedback, author, f"Aptean ticket removed: {_ticket_label(ticket)}")
         _vendor_event(ticket, author, f"Unlinked from Monin ticket #{feedback.pk}")
     return bool(added or removed)
 

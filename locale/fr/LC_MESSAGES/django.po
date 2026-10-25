@@ -687,3 +687,14 @@ msgstr "Utiliser « {value} » (hors liste)"
 
 msgid "No match"
 msgstr "Aucune correspondance"
+
+# Model names, vendor ticket placeholder
+msgid "pages"
+msgstr "pages"
+
+msgid "tabs"
+msgstr "onglets"
+
+#, python-format
+msgid "No ref. (#%(pk)s)"
+msgstr "Sans réf. (#%(pk)s)"
