@@ -4,7 +4,7 @@ from playwright.sync_api import expect
 from tests.tracker.factories import FeedbackFactory, VendorTicketFactory
 from tracker.choices import FeedbackType
 from tracker.models import Feedback, VendorTicket
-from tracker.statuses import CLOSED, RETEST_USER, SENT_TO_VENDOR
+from tracker.statuses import CLOSED, NEW, RETEST_USER, SENT_TO_VENDOR
 
 pytestmark = pytest.mark.e2e
 
@@ -126,3 +126,43 @@ def test_user_switches_language_and_the_choice_sticks(page, live_server, user, l
     page.get_by_role("button", name="FR", exact=True).click()
     expect(page.locator("html")).to_have_attribute("lang", "fr")
     expect(page.get_by_role("button", name="Déconnexion")).to_be_visible()
+
+
+def test_main_workflow_user_reports_then_staff_creates_and_links_the_vendor_ticket(
+    page, live_server, user, staff, login, fill_reference
+):
+    # 1. A tester reports a problem.
+    login(page, user)
+    page.goto(f"{live_server.url}/feedbacks/new/")
+    page.select_option("#id_type", FeedbackType.BUG)
+    fill_reference(page, "id_page", "Clients")
+    fill_reference(page, "id_tab", "Adresses")
+    page.fill("#id_description", "Montant faux sur la facture")
+    page.get_by_role("button", name="Enregistrer").click()
+    expect(page.get_by_text("Montant faux sur la facture").first).to_be_visible()
+    feedback = Feedback.objects.get()
+    assert (feedback.author, feedback.status) == (user, NEW)
+
+    # 2. Staff takes over (same browser, other account) and creates the vendor ticket from that feedback.
+    page.context.clear_cookies()
+    login(page, staff)
+    page.goto(f"{live_server.url}/feedbacks/{feedback.pk}/")
+    page.get_by_role("link", name="Créer le ticket Aptean").click()
+    page.wait_for_load_state()
+    page.fill("#id_ref", "TEST-777")
+    page.get_by_role("button", name="Enregistrer").click()
+    expect(page.get_by_text("Le ticket Monin passe en").first).to_be_visible()
+
+    # 3. Both tickets are linked, the feedback was transmitted (rule T1).
+    ticket = VendorTicket.objects.get()
+    assert ticket.ref == "TEST-777"
+    feedback.refresh_from_db()
+    assert list(feedback.vendor_tickets.all()) == [ticket]
+    assert feedback.status == SENT_TO_VENDOR
+
+    # 4. The link is visible from both sides. Saving redirects to the new vendor ticket page: it lists the Monin ticket;
+    # following that link leads to the Monin ticket, whose Aptean badge carries the reference.
+    monin_link = page.locator(f"a[href$='/feedbacks/{feedback.pk}/']").first
+    expect(monin_link).to_be_visible()
+    monin_link.click()
+    expect(page.get_by_role("link", name="TEST-777")).to_be_visible()
