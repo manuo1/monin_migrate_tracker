@@ -67,7 +67,7 @@ class FeedbackForm(forms.ModelForm):
             "tab": forms.TextInput(
                 attrs={"class": "form-control", "autocomplete": "off", "list": TABS_LIST, **SPELLCHECK}
             ),
-            "article_id": forms.TextInput(attrs={"class": "form-control"}),
+            "article_id": forms.TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
             "description": forms.Textarea(attrs={"class": "form-control", "rows": 5, **SPELLCHECK}),
         }
 
@@ -105,7 +105,7 @@ class FeedbackStaffForm(forms.ModelForm):
             "type": forms.Select(attrs={"class": "form-select form-select-sm"}),
             "page": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", "list": PAGES_LIST, **SPELLCHECK}),
             "tab": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off", "list": TABS_LIST, **SPELLCHECK}),
-            "article_id": forms.TextInput(attrs={"class": SMALL}),
+            "article_id": forms.TextInput(attrs={"class": SMALL, "autocomplete": "off"}),
         }
 
     def __init__(self, *args, **kwargs):
